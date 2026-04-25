@@ -905,7 +905,7 @@ function applyAdmin() {
     msg.textContent = '✓ Code accepted — opening free checkout…';
     setTimeout(() => {
       window.open(
-        'https://maoriel.gumroad.com/l/mgnvzu?coupon=' + encodeURIComponent(raw),
+        'https://maoriel.gumroad.com/l/mgnvzu/' + encodeURIComponent(ADMIN_CODES[raw]),
         '_blank'
       );
     }, 600);
