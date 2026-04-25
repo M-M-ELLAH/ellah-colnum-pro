@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ELLAH-ColNum Pro — Smart Column Numbering for Revit</title>
+  <meta name="description" content="Professional Revit plug-in that numbers all structural columns automatically in under 3 seconds. Supports Revit 2024–2027." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --cyan:    #00d4ff;
+      --cdim:    rgba(0,212,255,0.14);
+      --text:    #e8eaf6;
+      --dim:     #8892b0;
+      --card:    rgba(5,7,20,0.72);   /* card backgrounds — keep semi-dark */
+      --border:  rgba(0,212,255,0.16);
+    }
+
+    html { scroll-behavior: smooth; }
+    body  { font-family: 'Inter', sans-serif; background: #05060f; color: var(--text); overflow-x: hidden; }
+
+    /* ═══════════════════════════════════════
+       SCROLL-TELLING BG ENGINE
+       KEY: position:fixed, no section bg covers it
+    ═══════════════════════════════════════ */
+    #bg-stage {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .bg-layer {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      /* Slow-scale entrance + parallax handled by JS */
+      transition: opacity 1.3s cubic-bezier(0.25,0.1,0.25,1);
+      will-change: opacity, transform;
+    }
+    .bg-layer.active { opacity: 1; }
+
+    /* Dark gradient that sits over ALL images — never removed */
+    #bg-dark {
+      position: fixed; inset: 0; z-index: 1;
+      background: radial-gradient(ellipse 120% 80% at 50% 40%,
+        rgba(5,6,15,0.25) 0%,
+        rgba(5,6,15,0.5)  55%,
+        rgba(5,6,15,0.82) 100%
+      );
+      pointer-events: none;
+    }
+
+    /* Subtle scan-line grid */
+    #bg-grid {
+      position: fixed; inset: 0; z-index: 2;
+      background-image:
+        linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+      background-size: 70px 70px;
+      animation: gridDrift 28s linear infinite;
+      pointer-events: none;
+    }
+    @keyframes gridDrift { from{background-position:0 0} to{background-position:70px 70px} }
+
+    /* Bottom fade so sections feel merged */
+    #bg-bottom-fade {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 25vh; z-index: 3;
+      background: linear-gradient(to top, rgba(5,6,15,0.95), transparent);
+      pointer-events: none;
+    }
+
+    /* All real content above fixed layers */
+    #root { position: relative; z-index: 10; }
+
+    /* ═══════════════════════════════════════
+       KEY FIX: sections have NO background, NO backdrop-filter
+       Only inner cards have backgrounds
+    ═══════════════════════════════════════ */
+    section, .strip {
+      /* completely transparent — bg image shows through */
+      background: transparent !important;
+    }
+
+    /* Thin darkening overlay only at section transition points */
+    .section-shade {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(to bottom,
+        rgba(5,6,15,0.45) 0%,
+        rgba(5,6,15,0.10) 25%,
+        rgba(5,6,15,0.10) 75%,
+        rgba(5,6,15,0.45) 100%
+      );
+    }
+
+    /* ═══════════════════════════════════════
+       NAV
+    ═══════════════════════════════════════ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.3rem 3.5rem;
+      transition: all 0.4s ease;
+    }
+    nav.scrolled {
+      padding: 0.75rem 3.5rem;
+      background: rgba(5,6,15,0.9);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 700;
+      color: var(--cyan); text-decoration: none; letter-spacing: 0.04em;
+    }
+    .nav-logo span { color: var(--dim); font-weight: 300; }
+    .nav-links { display: flex; gap: 2.2rem; list-style: none; }
+    .nav-links a { color: rgba(232,234,246,0.75); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--cyan); }
+    .nav-cta {
+      padding: 0.5rem 1.5rem; background: var(--cyan); color: #05060f;
+      border-radius: 6px; font-size: 0.88rem; font-weight: 700;
+      text-decoration: none; font-family: 'Space Grotesk', sans-serif;
+      transition: all 0.2s;
+    }
+    .nav-cta:hover { background: #33deff; transform: translateY(-1px); }
+
+    /* ═══════════════════════════════════════
+       SCROLL REVEAL
+    ═══════════════════════════════════════ */
+    .rv, .rv-l, .rv-r {
+      opacity: 0;
+      transition: opacity 0.9s ease, transform 0.9s ease;
+    }
+    .rv   { transform: translateY(32px); }
+    .rv-l { transform: translateX(-46px); }
+    .rv-r { transform: translateX(46px); }
+    .rv.in, .rv-l.in, .rv-r.in { opacity: 1; transform: translate(0); }
+    .d1{transition-delay:0.10s} .d2{transition-delay:0.22s} .d3{transition-delay:0.34s}
+    .d4{transition-delay:0.46s} .d5{transition-delay:0.58s}
+
+    /* ═══════════════════════════════════════
+       TYPOGRAPHY & LAYOUT PRIMITIVES
+    ═══════════════════════════════════════ */
+    .inner { max-width: 1120px; width: 100%; margin: 0 auto; }
+    .lbl {
+      display: inline-block; font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.22em; text-transform: uppercase; color: var(--cyan);
+      margin-bottom: 0.9rem;
+    }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(3rem, 7vw, 5.5rem);
+      font-weight: 700; line-height: 1.1;
+    }
+    h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      font-weight: 700; line-height: 1.15;
+    }
+    .sub { font-size: 1.05rem; color: var(--dim); line-height: 1.8; font-weight: 300; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+
+    /* ═══════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════ */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 8rem 2rem 6rem;
+      position: relative;
+    }
+
+    /* Floating particles */
+    #pts { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .pt {
+      position: absolute; width: 2px; height: 2px;
+      background: var(--cyan); border-radius: 50%; opacity: 0;
+      animation: ptf var(--d,10s) var(--dl,0s) infinite linear;
+    }
+    @keyframes ptf {
+      0%   { opacity:0;   transform:translateY(100vh) }
+      8%   { opacity:0.8 }
+      92%  { opacity:0.3 }
+      100% { opacity:0;   transform:translateY(-5vh) translateX(var(--x,20px)) }
+    }
+
+    .hero-pill {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 1.1rem;
+      border: 1px solid rgba(0,212,255,0.45); border-radius: 50px;
+      font-size: 0.75rem; color: var(--cyan);
+      letter-spacing: 0.14em; text-transform: uppercase;
+      background: rgba(0,212,255,0.07); margin-bottom: 1.8rem;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); animation: blink 1.6s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+
+    h1 .accent {
+      color: var(--cyan); position: relative; display: inline-block;
+    }
+    h1 .accent::after {
+      content:''; position: absolute;
+      bottom: -6px; left: 0; right: 0; height: 3px;
+      background: var(--cyan); border-radius: 3px;
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scaleX(1)} 50%{opacity:0.2;transform:scaleX(0.6)} }
+
+    .hero-sub { font-size: 1.2rem; color: var(--dim); max-width: 580px; margin: 1.4rem auto 2.8rem; font-weight: 300; line-height: 1.8; }
+
+    .btn-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .btn-p {
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.92rem 2.6rem;
+      background: var(--cyan); color: #05060f; border: none;
+      border-radius: 8px; font-family: 'Space Grotesk', sans-serif;
+      font-size: 1.02rem; font-weight: 700; text-decoration: none;
+      cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;
+    }
+    .btn-p::after { content:''; position:absolute; inset:0; background:rgba(255,255,255,0); transition:background 0.2s; }
+    .btn-p:hover::after { background:rgba(255,255,255,0.14); }
+    .btn-p:hover { transform: translateY(-3px); }
+
+    .btn-g {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.92rem 1.8rem;
+      background: rgba(255,255,255,0.05); color: var(--text);
+      border: 1px solid rgba(232,234,246,0.2); border-radius: 8px;
+      font-size: 0.95rem; font-weight: 500; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-g:hover { border-color: var(--cyan); color: var(--cyan); transform: translateY(-3px); }
+
+    .chips { display: flex; gap: 0.7rem; justify-content: center; flex-wrap: wrap; margin-top: 3rem; }
+    .chip {
+      padding: 0.28rem 0.9rem; border: 1px solid rgba(0,212,255,0.2); border-radius: 4px;
+      font-size: 0.74rem; color: var(--dim); background: rgba(0,212,255,0.04);
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .scroll-hint {
+      position: absolute; bottom: 2.5rem; left: 50%; transform: translateX(-50%);
+      display: flex; flex-direction: column; align-items: center; gap: 0.4rem;
+      color: rgba(136,146,176,0.45); font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+      animation: bob 2.4s ease-in-out infinite;
+    }
+    .scroll-hint svg { width: 18px; }
+    @keyframes bob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(9px)} }
+
+    /* ═══════════════════════════════════════
+       STATS STRIP
+    ═══════════════════════════════════════ */
+    #stats {
+      padding: 3.5rem 2rem;
+      /* SUBTLE dark band — not fully opaque */
+      background: rgba(5,6,15,0.55) !important;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 2rem; max-width: 900px; margin: 0 auto; text-align: center; }
+    .sn { font-family: 'Space Grotesk', sans-serif; font-size: 3rem; font-weight: 700; color: var(--cyan); line-height: 1; }
+    .sl { font-size: 0.84rem; color: var(--dim); margin-top: 0.4rem; }
+
+    /* ═══════════════════════════════════════
+       PROBLEM
+    ═══════════════════════════════════════ */
+    #problem { padding: 8rem 2rem; position: relative; }
+
+    .pain-list { display: flex; flex-direction: column; gap: 1rem; }
+    .pain {
+      display: flex; gap: 1rem; padding: 1.1rem 1.3rem;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; transition: border-color 0.25s;
+    }
+    .pain:hover { border-color: rgba(0,212,255,0.35); }
+    .pi { font-size: 1.4rem; flex-shrink: 0; }
+    .pain strong { display: block; font-size: 0.92rem; margin-bottom: 0.2rem; }
+    .pain p { font-size: 0.84rem; color: var(--dim); line-height: 1.65; }
+
+    .img-box { border-radius: 14px; overflow: hidden; border: 1px solid var(--border); position: relative; }
+    .img-box img { width: 100%; display: block; }
+    .img-bar { position: absolute; bottom: 0; left: 0; right: 0; display: flex; }
+    .img-b { flex:1; padding: 0.65rem; text-align: center; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em; }
+    .img-b.bad  { background: rgba(255,55,55,0.82); color:#fff; }
+    .img-b.good { background: rgba(0,212,255,0.82); color:#05060f; }
+
+    /* ═══════════════════════════════════════
+       FEATURES
+    ═══════════════════════════════════════ */
+    #features { padding: 8rem 2rem; position: relative; }
+
+    .feat-head { text-align: center; margin-bottom: 4rem; }
+    .feat-head .sub { max-width: 520px; margin: 0 auto; }
+
+    .feat-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.4rem; }
+    .feat {
+      padding: 1.8rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: 12px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+    .feat:hover { border-color: var(--cyan); transform: translateY(-5px); }
+    .fic {
+      width: 46px; height: 46px; border-radius: 10px;
+      background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.22);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 1rem;
+    }
+    .fic svg { width: 22px; color: var(--cyan); }
+    .feat h3 { font-size: 0.96rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .feat p  { font-size: 0.84rem; color: var(--dim); line-height: 1.7; }
+
+    /* ═══════════════════════════════════════
+       HOW IT WORKS
+    ═══════════════════════════════════════ */
+    #how { padding: 8rem 2rem; position: relative; }
+
+    .steps { display: flex; flex-direction: column; gap: 1.7rem; }
+    .step { display: flex; gap: 1.2rem; align-items: flex-start; }
+    .snum {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: rgba(0,212,255,0.1); border: 1px solid var(--cyan);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; font-weight: 700;
+      color: var(--cyan); flex-shrink: 0;
+    }
+    .sbody h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .sbody p  { font-size: 0.84rem; color: var(--dim); line-height: 1.65; }
+
+    /* ═══════════════════════════════════════
+       COMPAT STRIP
+    ═══════════════════════════════════════ */
+    #compat {
+      padding: 5rem 2rem; text-align: center;
+      background: rgba(5,6,15,0.55) !important;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .cv-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2.5rem; }
+    .cv {
+      padding: 1.3rem 2rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: 10px; min-width: 130px;
+    }
+    .cv .vn { display: block; font-family:'Space Grotesk',sans-serif; font-size: 2rem; font-weight: 700; color: var(--cyan); }
+    .cv .vl { font-size: 0.8rem; color: var(--dim); margin-top: 0.2rem; }
+    .cv.off { opacity: 0.35; }
+    .cv.off .vn { color: var(--dim); }
+
+    /* ═══════════════════════════════════════
+       PRICING
+    ═══════════════════════════════════════ */
+    #pricing { padding: 8rem 2rem; text-align: center; position: relative; }
+
+    .price-wrap { max-width: 480px; margin: 3rem auto 0; }
+    .price-card {
+      padding: 2.8rem 2.4rem; background: var(--card);
+      border: 1px solid var(--cyan); border-radius: 18px; position: relative;
+    }
+    .ppill {
+      position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+      background: var(--cyan); color: #05060f; padding: 0.28rem 1.4rem; border-radius: 50px;
+      font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+      white-space: nowrap; font-family: 'Space Grotesk', sans-serif;
+    }
+    .pname { font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); margin-bottom: 0.8rem; }
+    .pamount { font-family: 'Space Grotesk', sans-serif; font-size: 4.2rem; font-weight: 700; line-height: 1; }
+    .pamount sup { font-size: 1.6rem; vertical-align: top; margin-top: 0.55rem; display: inline-block; }
+    .pfreq { font-size: 0.83rem; color: var(--dim); margin-top: 0.3rem; }
+    .pdiv { border: none; border-top: 1px solid var(--border); margin: 1.6rem 0; }
+    .pfeats { list-style: none; text-align: left; display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 2rem; }
+    .pfeats li { display: flex; align-items: center; gap: 0.75rem; font-size: 0.92rem; }
+    .chk {
+      width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(0,212,255,0.1); border: 1px solid var(--cyan);
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    }
+    .chk svg { width: 11px; color: var(--cyan); }
+    .buy-btn {
+      display: block; width: 100%; padding: 1.05rem;
+      background: var(--cyan); color: #05060f; border: none; border-radius: 9px;
+      font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 800;
+      text-decoration: none; text-align: center; cursor: pointer; transition: all 0.2s;
+    }
+    .buy-btn:hover { background: #33deff; transform: translateY(-2px); }
+    .pnote { font-size: 0.78rem; color: var(--dim); margin-top: 1rem; }
+    .pnote a { color: var(--cyan); text-decoration: none; }
+
+    /* ═══════════════════════════════════════
+       FAQ
+    ═══════════════════════════════════════ */
+    #faq { padding: 8rem 2rem; position: relative; }
+    .faq-head { text-align: center; margin-bottom: 3.5rem; }
+    .faq-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+    .fi {
+      padding: 1.3rem 1.5rem; background: var(--card);
+      border: 1px solid var(--border); border-radius: 10px;
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .fi:hover { border-color: rgba(0,212,255,0.35); }
+    .fq { font-size: 0.93rem; font-weight: 600; display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+    .fa-arr { color: var(--cyan); flex-shrink: 0; font-size: 1.1rem; transition: transform 0.3s; }
+    .fi.open .fa-arr { transform: rotate(180deg); }
+    .fa { max-height: 0; overflow: hidden; font-size: 0.86rem; color: var(--dim); line-height: 1.75; transition: max-height 0.35s ease, margin-top 0.2s; }
+    .fi.open .fa { max-height: 220px; margin-top: 0.75rem; }
+
+    /* ═══════════════════════════════════════
+       CTA
+    ═══════════════════════════════════════ */
+    #cta {
+      padding: 7rem 2rem; text-align: center; position: relative;
+      background: rgba(5,6,15,0.55) !important;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ═══════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════ */
+    footer {
+      padding: 3rem 2rem; background: rgba(3,4,10,0.96) !important;
+      border-top: 1px solid var(--border); text-align: center;
+    }
+    .flogo { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--cyan); margin-bottom: 0.4rem; }
+    .ftag  { font-size: 0.82rem; color: var(--dim); margin-bottom: 1.2rem; }
+    .flinks { display: flex; gap: 1.5rem; justify-content: center; list-style: none; margin-bottom: 1.2rem; }
+    .flinks a { color: var(--dim); font-size: 0.82rem; text-decoration: none; transition: color 0.2s; }
+    .flinks a:hover { color: var(--cyan); }
+    .fcopy { font-size: 0.74rem; color: rgba(136,146,176,0.4); }
+
+    /* ═══════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════ */
+    @media (max-width: 860px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .two { grid-template-columns: 1fr; gap: 2.5rem; }
+      .feat-grid { grid-template-columns: 1fr 1fr; }
+      .stats-row { grid-template-columns: repeat(2,1fr); }
+      .faq-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .feat-grid { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════ 4 BACKGROUND LAYERS ════ -->
+<div id="bg-stage">
+  <div class="bg-layer" id="bg0"
+       style="background-image:url('assets/hero-v2.png');    background-position:center 30%;"></div>
+  <div class="bg-layer" id="bg1"
+       style="background-image:url('assets/bg-problem.png'); background-position:center center;"></div>
+  <div class="bg-layer" id="bg2"
+       style="background-image:url('assets/bg-features.png');background-position:center 35%;"></div>
+  <div class="bg-layer" id="bg3"
+       style="background-image:url('assets/bg-pricing.png'); background-position:center 20%;"></div>
+</div>
+<div id="bg-dark"></div>
+<div id="bg-grid"></div>
+<div id="bg-bottom-fade"></div>
+
+<!-- ════ NAV ════ -->
+<nav id="nav">
+  <a class="nav-logo" href="#hero">ELLAH<span>-ColNum Pro</span></a>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <a class="nav-cta" href="#pricing">Buy Now →</a>
+</nav>
+
+<!-- ════ ROOT ════ -->
+<div id="root">
+
+  <!-- ─── HERO (bg0) ─── -->
+  <section id="hero" data-bg="0">
+    <div id="pts"></div>
+    <div class="rv d1">
+      <div class="hero-pill"><span class="dot"></span> Professional Revit Plug-in · v1.0</div>
+    </div>
+    <h1 class="rv d2">
+      Smart Column<br/>
+      <span class="accent">Auto-Numbering</span><br/>
+      for Revit
+    </h1>
+    <p class="hero-sub rv d3">
+      Stop numbering columns by hand. ELLAH-ColNum Pro numbers every structural column in your entire project — across all floors — in under 3 seconds.
+    </p>
+    <div class="btn-row rv d4">
+      <a href="#pricing" class="btn-p">
+        <svg width="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        Get it for $49
+      </a>
+      <a href="#how" class="btn-g">See how it works ↓</a>
+    </div>
+    <div class="chips rv d5">
+      <span class="chip">Revit 2024</span><span class="chip">Revit 2025</span>
+      <span class="chip">Revit 2026</span><span class="chip">Revit 2027</span>
+      <span class="chip">Windows 10 / 11</span>
+    </div>
+    <div class="scroll-hint">scroll
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+    </div>
+  </section>
+
+  <!-- ─── STATS (bg0) ─── -->
+  <div id="stats" class="strip" data-bg="0">
+    <div class="stats-row inner">
+      <div class="rv d1"><div class="sn"><span class="cnt" data-t="3">0</span>s</div><div class="sl">To number an entire project</div></div>
+      <div class="rv d2"><div class="sn"><span class="cnt" data-t="100">0</span>%</div><div class="sl">Structural columns only</div></div>
+      <div class="rv d3"><div class="sn"><span class="cnt" data-t="4">0</span></div><div class="sl">Supported Revit versions</div></div>
+      <div class="rv d4"><div class="sn">∞</div><div class="sl">Floors numbered at once</div></div>
+    </div>
+  </div>
+
+  <!-- ─── PROBLEM (bg1) ─── -->
+  <section id="problem" data-bg="1">
+    <div class="inner two">
+      <div>
+        <div class="rv"><span class="lbl">The Problem</span></div>
+        <h2 class="rv d1">Manual numbering =<br/>wasted hours + mistakes</h2>
+        <p class="sub rv d2" style="margin:1rem 0 2rem">Every structural engineer knows this pain. A project with 80 columns and 6 floors means 480 cells to fill manually — one by one.</p>
+        <div class="pain-list">
+          <div class="pain rv d2">
+            <span class="pi">⏱</span>
+            <div><strong>Hours wasted per project</strong>
+              <p>Numbering 80 columns × 6 floors = 2+ hours of repetitive work on every project.</p></div>
+          </div>
+          <div class="pain rv d3">
+            <span class="pi">⚠</span>
+            <div><strong>Human errors</strong>
+              <p>Duplicate numbers, skipped columns, wrong order — mistakes found only during construction.</p></div>
+          </div>
+          <div class="pain rv d4">
+            <span class="pi">🔄</span>
+            <div><strong>Re-numbering on every change</strong>
+              <p>Added a new column? Re-number everything from scratch. How many times have you done this?</p></div>
+          </div>
+        </div>
+      </div>
+      <div class="rv-r">
+        <div class="img-box">
+          <img src="assets/before-after-illustration.png" alt="Before and after" />
+          <div class="img-bar">
+            <div class="img-b bad">Before: hours of manual work</div>
+            <div class="img-b good">After: 3 seconds with the plug-in</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FEATURES (bg2) ─── -->
+  <section id="features" data-bg="2">
+    <div class="inner">
+      <div class="feat-head">
+        <div class="rv"><span class="lbl">Features</span></div>
+        <h2 class="rv d1">Everything you need for professional projects</h2>
+        <p class="sub rv d2">Not just numbering — a smart tool that understands structural column logic.</p>
+      </div>
+      <div class="feat-grid">
+        <div class="feat rv d1">
+          <div class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+          <h3>North-West Smart Sorting</h3>
+          <p>Numbers from top-left, row by row rightward then downward — the standard Israeli structural engineering convention.</p>
+        </div>
+        <div class="feat rv d2">
+          <div class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+          <h3>All Floors at Once</h3>
+          <p>A column repeating across multiple floors gets one consistent mark throughout the entire building model.</p>
+        </div>
+        <div class="feat rv d3">
+          <div class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+          <h3>Live Preview Before Apply</h3>
+          <p>See exactly which number every column will receive before confirming. Adjust settings and refresh in real time.</p>
+        </div>
+        <div class="feat rv d4">
+          <div class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <h3>Structural Columns Only</h3>
+          <p>Automatically filters OST_StructuralColumns — never touches architectural columns, walls, or any other element.</p>
+        </div>
+        <div class="feat rv d5">
+          <div class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></div>
+          <h3>Fully Customizable</h3>
+          <p>Set start number, prefix, suffix, and sort direction. Defaults tuned to the Israeli standard out of the box.</p>
+        </div>
+        <div class="feat rv d1">
+          <div class="fic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/></svg></div>
+          <h3>Full Undo Support</h3>
+          <p>Every operation runs inside a Revit Transaction — a single Ctrl+Z rolls back all numbering instantly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── HOW IT WORKS (bg2) ─── -->
+  <section id="how" data-bg="2">
+    <div class="inner">
+      <div class="rv"><span class="lbl">How It Works</span></div>
+      <h2 class="rv d1">Three clicks. That's it.</h2>
+      <div class="two" style="margin-top:3.5rem">
+        <div class="steps">
+          <div class="step rv d1">
+            <div class="snum">1</div>
+            <div class="sbody"><h4>Open your Revit project</h4><p>The plug-in appears in the toolbar under the "ELLAH Tools" ribbon tab after installation.</p></div>
+          </div>
+          <div class="step rv d2">
+            <div class="snum">2</div>
+            <div class="sbody"><h4>Click "Number Columns"</h4><p>A settings dialog opens with a live preview table showing every column in the project.</p></div>
+          </div>
+          <div class="step rv d3">
+            <div class="snum">3</div>
+            <div class="sbody"><h4>Choose settings → Apply</h4><p>Pick your start number, prefix, and sort order. Hit Apply — every column is numbered.</p></div>
+          </div>
+          <div class="step rv d4">
+            <div class="snum">✓</div>
+            <div class="sbody"><h4>MARK parameter updated across all floors</h4><p>Values written directly to Revit's standard MARK parameter — visible in drawings immediately.</p></div>
+          </div>
+        </div>
+        <div class="rv-r">
+          <div class="img-box"><img src="assets/plugin-ui-illustration.png" alt="Plug-in UI inside Revit" /></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── COMPAT (bg2) ─── -->
+  <div id="compat" class="strip" data-bg="2">
+    <div class="inner">
+      <div class="rv"><span class="lbl">Compatibility</span></div>
+      <h2 class="rv d1">Works on every Revit version you have</h2>
+      <p class="sub rv d2" style="max-width:520px;margin:0 auto">.NET 8 Runtime is included with all supported Revit versions — no extra install required.</p>
+      <div class="cv-row rv d3">
+        <div class="cv"><span class="vn">2024</span><div class="vl">Revit 2024 ✓</div></div>
+        <div class="cv"><span class="vn">2025</span><div class="vl">Revit 2025 ✓</div></div>
+        <div class="cv"><span class="vn">2026</span><div class="vl">Revit 2026 ✓</div></div>
+        <div class="cv"><span class="vn">2027</span><div class="vl">Revit 2027 ✓</div></div>
+        <div class="cv off"><span class="vn">2023</span><div class="vl">Not supported</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PRICING (bg3) ─── -->
+  <section id="pricing" data-bg="3">
+    <div class="inner">
+      <div class="rv"><span class="lbl">Pricing</span></div>
+      <h2 class="rv d1">An investment that pays off on the first project</h2>
+      <p class="sub rv d2" style="max-width:480px;margin:0 auto">One hour saved = full ROI. Yours forever.</p>
+      <div class="price-wrap">
+        <div class="price-card rv">
+          <div class="ppill">Lifetime Professional License</div>
+          <div class="pname">ELLAH-ColNum Pro</div>
+          <div class="pamount"><sup>$</sup>49</div>
+          <div class="pfreq">One-time payment · No subscription · No annual renewal</div>
+          <hr class="pdiv"/>
+          <ul class="pfeats">
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>Single machine license</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>Revit 2024 / 2025 / 2026 / 2027</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>Free updates for future Revit versions</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>Live preview &amp; custom parameters</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>All floors numbered in one click</li>
+            <li><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>Direct technical support</li>
+          </ul>
+          <a href="https://ellah.gumroad.com/l/colnumpro" class="buy-btn" target="_blank" rel="noopener">
+            Buy Now — Get Your License Key Instantly
+          </a>
+          <div class="pnote">License key by email within 5 minutes · <a href="mailto:ellah@ellah.co.il">ellah@ellah.co.il</a></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FAQ (bg3) ─── -->
+  <section id="faq" data-bg="3">
+    <div class="inner">
+      <div class="faq-head">
+        <div class="rv"><span class="lbl">FAQ</span></div>
+        <h2 class="rv d1">Got questions? We have answers.</h2>
+      </div>
+      <div class="faq-grid">
+        <div class="fi rv d1"><div class="fq">Does it work on all Revit versions?<span class="fa-arr">↓</span></div><div class="fa">Supported: Revit 2024, 2025, 2026, 2027. Revit 2023 and earlier use an older .NET Framework and are not supported.</div></div>
+        <div class="fi rv d2"><div class="fq">Is it safe? Can it damage my project?<span class="fa-arr">↓</span></div><div class="fa">Completely safe. All operations run inside a Revit Transaction — one Ctrl+Z rolls everything back. The plug-in only writes to the MARK parameter.</div></div>
+        <div class="fi rv d3"><div class="fq">Structural vs. architectural columns?<span class="fa-arr">↓</span></div><div class="fa">The plug-in filters by OST_StructuralColumns — exactly the columns created under "Structure" in Revit. Architectural columns are never touched.</div></div>
+        <div class="fi rv d4"><div class="fq">How do I receive my license key?<span class="fa-arr">↓</span></div><div class="fa">Immediately after purchase you'll receive an automated email with your license key. Enter it in the activation window in the plug-in — done.</div></div>
+        <div class="fi rv d5"><div class="fq">What happens when Revit releases a new version?<span class="fa-arr">↓</span></div><div class="fa">Updates for new Revit versions are sent automatically and for free to all customers.</div></div>
+        <div class="fi rv d1"><div class="fq">Can I install on multiple machines?<span class="fa-arr">↓</span></div><div class="fa">Each license covers one machine. For team licensing contact ellah@ellah.co.il for special pricing.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CTA (bg3) ─── -->
+  <div id="cta" class="strip" data-bg="3">
+    <div class="inner" style="text-align:center">
+      <div class="rv"><span class="lbl">Get Started</span></div>
+      <h2 class="rv d1" style="font-size:clamp(2rem,4.5vw,3.2rem)">Ready to save hours on every project?</h2>
+      <p class="sub rv d2" style="max-width:460px;margin:1rem auto 2rem">Download now. Installed in 2 minutes. Works on the first project you open.</p>
+      <a href="#pricing" class="btn-p rv d3" style="display:inline-flex">Get ELLAH-ColNum Pro — $49 →</a>
+    </div>
+  </div>
+
+  <!-- ─── FOOTER ─── -->
+  <footer>
+    <div class="flogo">ELLAH-ColNum Pro</div>
+    <div class="ftag">Smart Column Numbering for Revit · Powered by ELLAH Engineering Tools</div>
+    <ul class="flinks">
+      <li><a href="mailto:ellah@ellah.co.il">Contact</a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+    </ul>
+    <div class="fcopy">© 2026 ELLAH Engineering Tools · All rights reserved</div>
+  </footer>
+
+</div><!-- /root -->
+
+<script>
+/* ── Particles ── */
+(function(){
+  const c = document.getElementById('pts');
+  for(let i=0;i<35;i++){
+    const p=document.createElement('div'); p.className='pt';
+    p.style.cssText=`left:${Math.random()*100}%;--d:${7+Math.random()*12}s;--dl:${Math.random()*10}s;--x:${(Math.random()-.5)*100}px`;
+    c.appendChild(p);
+  }
+})();
+
+/* ── Nav ── */
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', ()=> nav.classList.toggle('scrolled', scrollY>60), {passive:true});
+
+/* ══════════════════════════════
+   SCROLL-TELLING BACKGROUND ENGINE
+   Uses IntersectionObserver to detect which section is most visible
+   and cross-fades to that section's assigned background layer.
+══════════════════════════════ */
+const layers = [
+  document.getElementById('bg0'),
+  document.getElementById('bg1'),
+  document.getElementById('bg2'),
+  document.getElementById('bg3'),
+];
+
+let current = 0;
+// Activate initial bg immediately
+layers[0].classList.add('active');
+
+// Parallax: subtle vertical drift per layer
+function doParallax() {
+  const sy = scrollY;
+  layers.forEach((l, i) => {
+    const dir  = i % 2 === 0 ? 1 : -1;
+    const rate = 0.06 + i * 0.01;
+    l.style.transform = `translateY(${sy * rate * dir}px) scale(1.08)`;
+  });
+}
+
+// Track which data-bg value is currently most-centered in viewport
+const sections = Array.from(document.querySelectorAll('[data-bg]'));
+
+function updateBg() {
+  doParallax();
+
+  const mid = scrollY + window.innerHeight * 0.5;
+  let best = 0;
+  let bestDist = Infinity;
+
+  sections.forEach(s => {
+    const rect = s.getBoundingClientRect();
+    const sectionMid = scrollY + rect.top + rect.height * 0.5;
+    const dist = Math.abs(mid - sectionMid);
+    if (dist < bestDist) {
+      bestDist = dist;
+      best = parseInt(s.dataset.bg, 10);
+    }
+  });
+
+  if (best !== current) {
+    layers[current].classList.remove('active');
+    layers[best].classList.add('active');
+    current = best;
+  }
+}
+
+window.addEventListener('scroll', updateBg, {passive:true});
+window.addEventListener('resize', updateBg, {passive:true});
+// Initial call after DOM settles
+requestAnimationFrame(updateBg);
+
+/* ── Scroll Reveal ── */
+const rvObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){ e.target.classList.add('in'); rvObs.unobserve(e.target); }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.rv,.rv-l,.rv-r').forEach(el => rvObs.observe(el));
+
+/* ── Count-up ── */
+const cntObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(!e.isIntersecting) return;
+    const el = e.target, target = +el.dataset.t;
+    const t0 = performance.now(), dur = 1400;
+    (function tick(now){
+      const p = Math.min((now-t0)/dur,1);
+      el.textContent = Math.round((1-Math.pow(1-p,3))*target);
+      if(p<1) requestAnimationFrame(tick);
+    })(performance.now());
+    cntObs.unobserve(el);
+  });
+},{threshold:0.5});
+document.querySelectorAll('.cnt').forEach(el => cntObs.observe(el));
+
+/* ── FAQ ── */
+document.querySelectorAll('.fi').forEach(item=>{
+  item.addEventListener('click',()=>{
+    const o=item.classList.contains('open');
+    document.querySelectorAll('.fi').forEach(i=>i.classList.remove('open'));
+    if(!o) item.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>

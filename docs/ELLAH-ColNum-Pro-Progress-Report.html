@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<title>ELLAH-ColNum Pro — Project Progress Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: "Segoe UI", Arial, sans-serif; font-size: 13px; color: #1a1a2e; background: #fff; padding: 40px; max-width: 960px; margin: 0 auto; }
+  h1 { font-size: 26px; color: #1a3a8f; margin-bottom: 4px; }
+  h2 { font-size: 16px; color: #1a3a8f; margin: 28px 0 10px; border-bottom: 2px solid #1a3a8f; padding-bottom: 4px; }
+  h3 { font-size: 13px; font-weight: 700; margin: 16px 0 6px; color: #333; }
+  p  { line-height: 1.6; margin-bottom: 8px; color: #333; }
+  .subtitle { color: #666; font-size: 12px; margin-bottom: 2px; }
+  .badges { display: flex; gap: 8px; margin: 8px 0 4px; flex-wrap: wrap; }
+  .badge { background: #e8f0fe; color: #1a3a8f; border-radius: 12px; padding: 2px 10px; font-size: 11px; font-weight: 600; }
+  .badge.green { background: #e6f4ea; color: #1e7e34; }
+  .badge.gray  { background: #f1f3f4; color: #555; }
+  .badge.orange{ background: #fff3e0; color: #e65100; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0 18px; font-size: 12px; }
+  th { background: #1a3a8f; color: #fff; padding: 7px 10px; text-align: right; font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #f8f9ff; }
+  tr.warn td { background: #fff8e1; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 10px 0; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 10px 0; }
+  .grid4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; margin: 10px 0; }
+  .card { border: 1px solid #dce3f3; border-radius: 6px; padding: 14px; background: #fafcff; }
+  .card h4 { font-size: 12px; font-weight: 700; color: #1a3a8f; margin-bottom: 8px; border-bottom: 1px solid #dce3f3; padding-bottom: 6px; }
+  .card p, .card li { font-size: 12px; color: #444; line-height: 1.5; }
+  .card ul { padding-right: 16px; }
+  .stat-box { border: 1px solid #dce3f3; border-radius: 6px; padding: 12px 16px; text-align: center; background: #f0f4ff; }
+  .stat-val  { font-size: 28px; font-weight: 700; color: #1a3a8f; }
+  .stat-lbl  { font-size: 11px; color: #666; margin-top: 2px; }
+  .callout { background: #e8f0fe; border-right: 4px solid #1a3a8f; border-radius: 4px; padding: 10px 14px; margin: 10px 0; font-size: 12px; color: #1a3a8f; }
+  .callout.warn { background: #fff8e1; border-color: #f9a825; color: #795500; }
+  .callout.ok   { background: #e6f4ea; border-color: #2e7d32; color: #1b5e20; }
+  pre { background: #f4f4f8; border: 1px solid #ddd; border-radius: 5px; padding: 14px 16px; font-size: 11px; font-family: Consolas, monospace; overflow-x: auto; white-space: pre; margin: 10px 0; direction: ltr; text-align: left; line-height: 1.5; }
+  .divider { border: none; border-top: 1px solid #e0e0e0; margin: 24px 0; }
+  @media print {
+    body { padding: 20px; font-size: 12px; }
+    h2 { page-break-before: auto; }
+    table, .grid2, .grid3, .grid4 { page-break-inside: avoid; }
+    pre { font-size: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<h1>ELLAH-ColNum Pro</h1>
+<div class="badges">
+  <span class="badge">v1.0.0</span>
+  <span class="badge green">Built in 1 day — April 25, 2026</span>
+  <span class="badge gray">Revit 2025 · C# / .NET 8</span>
+</div>
+<p class="subtitle">Smart Column Numbering Plugin for Autodesk Revit</p>
+<p class="subtitle">Project Progress Report — Developer Handoff &amp; Commercial Readiness Review</p>
+
+<hr class="divider"/>
+
+<!-- STATS -->
+<div class="grid4">
+  <div class="stat-box"><div class="stat-val">3</div><div class="stat-lbl">Projects (Core / Revit / Setup)</div></div>
+  <div class="stat-box"><div class="stat-val">18</div><div class="stat-lbl">Source Files</div></div>
+  <div class="stat-box"><div class="stat-val">8</div><div class="stat-lbl">Unit Tests — All Passing</div></div>
+  <div class="stat-box"><div class="stat-val">178KB</div><div class="stat-lbl">Final Installer Size</div></div>
+</div>
+
+<hr class="divider"/>
+
+<!-- 1. PROBLEM -->
+<h2>1. Problem Statement</h2>
+<p>Structural engineers number columns manually in Revit — either floor by floor using tools like DiRoots, or entirely by hand. No existing tool handles cross-floor numbering consistently.</p>
+<table>
+  <tr><th>Problem</th><th>Current State</th><th>ELLAH-ColNum Pro</th></tr>
+  <tr><td>Cross-floor numbering</td><td>Manual / per-view</td><td>One click, all floors</td></tr>
+  <tr><td>Continuing existing marks</td><td>Must track manually</td><td>Auto-detects pattern</td></tr>
+  <tr><td>Grid-based naming (A1, B2)</td><td>Not available in DiRoots</td><td>Built-in</td></tr>
+  <tr><td>New columns on upper floors</td><td>Missed or renumbered</td><td>Detected separately</td></tr>
+  <tr><td>Undo support</td><td>Varies by tool</td><td>Full Ctrl+Z via Transaction</td></tr>
+</table>
+
+<hr class="divider"/>
+
+<!-- 2. ARCHITECTURE -->
+<h2>2. Architecture — Clean Architecture (3 Projects)</h2>
+<p>Core has zero Revit dependency. Revit layer depends on Core. Setup embeds both and installs them.</p>
+<div class="grid3">
+  <div class="card">
+    <h4>Project 1 — Core</h4>
+    <span class="badge gray">net8.0 · No Revit dependency</span>
+    <p style="margin-top:8px">Pure domain logic. Fully testable without Revit installed.</p>
+    <ul><li>Models/</li><li>Services/</li><li>Interfaces/</li></ul>
+  </div>
+  <div class="card">
+    <h4>Project 2 — Revit</h4>
+    <span class="badge orange">net8.0-windows · Revit API</span>
+    <p style="margin-top:8px">Thin adapter. Reads/writes Revit elements via API.</p>
+    <ul><li>Collectors/</li><li>Writers/</li><li>Helpers/</li><li>Commands/</li><li>App/</li></ul>
+  </div>
+  <div class="card">
+    <h4>Project 3 — Setup</h4>
+    <span class="badge gray">WPF exe · Standalone</span>
+    <p style="margin-top:8px">Self-contained installer. DLL + addin embedded as resources.</p>
+    <ul><li>InstallerWindow.xaml</li><li>Resources/</li></ul>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- 3. FOLDER STRUCTURE -->
+<h2>3. Full Folder Structure</h2>
+<pre>
+NEW PROJECT - NUMBERS/
+├── EllahColNumPro.sln                    ← Visual Studio solution (open this)
+│
+├── src/
+│   ├── Core/                             ← Project 1: Pure C# logic (no Revit)
+│   │   ├── Models/
+│   │   │   ├── ColumnData.cs             ← Single column element data model
+│   │   │   ├── ColumnGroup.cs            ← Group of columns at same X,Y position
+│   │   │   └── NumberingOptions.cs       ← User settings (mode, prefix, tolerance...)
+│   │   ├── Services/
+│   │   │   ├── ColumnGrouper.cs          ← Groups columns by position + tolerance
+│   │   │   ├── NumberingEngine.cs        ← Assigns marks (Smart/Override/AddOnly)
+│   │   │   └── MarkAnalyzer.cs           ← Detects existing marks & numbering pattern
+│   │   └── Interfaces/
+│   │       ├── IColumnReader.cs          ← Contract: read columns from any source
+│   │       └── IMarkWriter.cs            ← Contract: write marks to any target
+│   │
+│   ├── Revit/                            ← Project 2: Revit API adapter layer
+│   │   ├── App/
+│   │   │   └── EllahColNumProApp.cs      ← IExternalApplication → creates Ribbon tab
+│   │   ├── Collectors/
+│   │   │   └── RevitColumnCollector.cs   ← Reads Structural Columns from Revit API
+│   │   ├── Writers/
+│   │   │   └── RevitMarkWriter.cs        ← Writes Mark parameter back to Revit
+│   │   ├── Helpers/
+│   │   │   └── GridHelper.cs             ← Parses grid intersection (A1, B2...)
+│   │   ├── Commands/
+│   │   │   └── NumberColumnsCommand.cs   ← IExternalCommand → button click handler
+│   │   └── EllahColNumPro.addin          ← Revit add-in manifest (XML)
+│   │
+│   └── Setup/                            ← Project 3: Standalone installer
+│       ├── InstallerWindow.xaml/.cs      ← WPF installer window
+│       ├── App.xaml/.cs
+│       └── Resources/
+│           ├── EllahColNumPro.dll        ← Embedded at build time
+│           └── EllahColNumPro.addin      ← Embedded at build time
+│
+├── tests/
+│   └── Core.Tests/
+│       ├── ColumnGrouperTests.cs         ← 4 unit tests (no Revit needed)
+│       └── NumberingEngineTests.cs       ← 4 unit tests (no Revit needed)
+│
+├── installer/
+│   ├── Build-Release.ps1                 ← Builds everything → dist/Setup.exe
+│   ├── Deploy-ToRevit.ps1                ← Dev-only: quick deploy for testing
+│   └── Install-EllahColNumPro.ps1        ← Alternative PS1 installer with WPF UI
+│
+└── dist/
+    ├── EllahColNumPro-Setup.exe          ← THE FILE TO DISTRIBUTE (178 KB)
+    └── EllahColNumPro-Setup.zip          ← ZIP version for email
+</pre>
+
+<hr class="divider"/>
+
+<!-- 4. TECH STACK -->
+<h2>4. Technology Stack</h2>
+<table>
+  <tr><th>Component</th><th>Technology</th><th>Version</th><th>Cost</th></tr>
+  <tr><td>Language</td><td>C#</td><td>12.0</td><td>Free</td></tr>
+  <tr><td>Runtime</td><td>.NET</td><td>8.0</td><td>Free</td></tr>
+  <tr><td>Revit API</td><td>RevitAPI.dll + RevitAPIUI.dll</td><td>2025</td><td>Free (with Revit)</td></tr>
+  <tr><td>UI Framework</td><td>WPF (Windows Presentation Foundation)</td><td>Built-in</td><td>Free</td></tr>
+  <tr><td>Unit Testing</td><td>xUnit + FluentAssertions</td><td>Latest</td><td>Free</td></tr>
+  <tr><td>Build Tool</td><td>dotnet CLI + MSBuild</td><td>8.0.420</td><td>Free</td></tr>
+  <tr><td>IDE (development)</td><td>Cursor / VS Code</td><td>Latest</td><td>Free</td></tr>
+  <tr><td>Package Manager</td><td>NuGet</td><td>—</td><td>Free</td></tr>
+</table>
+
+<hr class="divider"/>
+
+<!-- 5. CORE LOGIC -->
+<h2>5. Core Logic — How It Works</h2>
+<h3>Step 1 — Collect</h3>
+<p>RevitColumnCollector uses FilteredElementCollector(OST_StructuralColumns) to get all structural column elements. Reads: X/Y position, Base/Top Level, Family type, ColumnLocationMark (grid intersection A(64)-1(-46)), current Mark value.</p>
+<h3>Step 2 — Group</h3>
+<p>ColumnGrouper clusters columns by X,Y position within a tolerance (default 0.5 ft ≈ 15 cm). A column spanning floors 1–5 = one Revit element = one group. A new column starting on floor 3 = separate group.</p>
+<h3>Step 3 — Analyze Existing Marks</h3>
+<table>
+  <tr><th>Status</th><th>Meaning</th><th>Action</th></tr>
+  <tr><td>FullyNumbered</td><td>All floors have the same Mark</td><td>Keep as-is</td></tr>
+  <tr><td>PartiallyNumbered</td><td>Some floors have Mark, some empty</td><td>Complete to all floors</td></tr>
+  <tr><td>Conflicting</td><td>Different floors have different Marks</td><td>Keep most common, warn user</td></tr>
+  <tr><td>NotNumbered</td><td>No Mark anywhere in group</td><td>Assign next number</td></tr>
+</table>
+<h3>Step 4 — Assign (3 Modes)</h3>
+<table>
+  <tr><th>Mode</th><th>Behavior</th><th>Use Case</th></tr>
+  <tr><td>Smart Continue</td><td>Detects prefix+number pattern, keeps existing marks, continues from max+1</td><td>Default — partial manual work exists</td></tr>
+  <tr><td>Add Only</td><td>Only numbers groups with zero marks. Skips everything else</td><td>Conservative — do not touch anything existing</td></tr>
+  <tr><td>Override</td><td>Renumbers everything from StartNumber. Existing marks replaced</td><td>Start fresh — full renumber</td></tr>
+</table>
+<h3>Step 5 — Write</h3>
+<p>RevitMarkWriter writes ALL_MODEL_MARK parameter inside a named Revit Transaction. Full Ctrl+Z undo support. ReadOnly parameters are skipped safely. Returns count of updated elements.</p>
+
+<hr class="divider"/>
+
+<!-- 6. INSTALLATION -->
+<h2>6. Installation Guide</h2>
+<h3>For End Users (office PCs)</h3>
+<table>
+  <tr><th>Step</th><th>Action</th></tr>
+  <tr><td>1</td><td>Receive EllahColNumPro-Setup.zip by email / WhatsApp</td></tr>
+  <tr><td>2</td><td>Right-click ZIP → Extract All</td></tr>
+  <tr><td>3</td><td>Double-click EllahColNumPro-Setup.exe</td></tr>
+  <tr><td>4</td><td>If Windows warns "Unknown publisher" → More Info → Run Anyway</td></tr>
+  <tr><td>5</td><td>Click Install in the installer window</td></tr>
+  <tr><td>6</td><td>Open Revit 2025 → look for ELLAH-ColNum Pro tab in the ribbon</td></tr>
+</table>
+<div class="callout">Installer auto-detects Revit 2024 / 2025 / 2026 and installs to all found versions. Files land in: %APPDATA%\Autodesk\Revit\Addins\{version}\</div>
+
+<h3>For Developers (building new versions)</h3>
+<table>
+  <tr><th>Task</th><th>Command</th></tr>
+  <tr><td>Run all tests</td><td>dotnet test tests/Core.Tests/</td></tr>
+  <tr><td>Quick dev deploy</td><td>.\installer\Deploy-ToRevit.ps1</td></tr>
+  <tr><td>Build release package</td><td>.\installer\Build-Release.ps1 → dist\EllahColNumPro-Setup.exe</td></tr>
+</table>
+
+<hr class="divider"/>
+
+<!-- 7. MISSING FOR COMMERCIAL -->
+<h2>7. What's Missing for Commercial Release</h2>
+<div class="callout warn">The plugin is fully functional for internal office use. The following items are required before selling commercially.</div>
+<table>
+  <tr><th>Item</th><th>Priority</th><th>Effort</th><th>Description</th></tr>
+  <tr class="warn"><td>Settings UI Window in Revit</td><td>HIGH</td><td>3–5 days</td><td>WPF dialog for prefix, mode, tolerance — currently hardcoded defaults</td></tr>
+  <tr class="warn"><td>Preview Table before writing</td><td>HIGH</td><td>2–3 days</td><td>Show all changes before applying — user must confirm</td></tr>
+  <tr class="warn"><td>License / Activation System</td><td>HIGH</td><td>1 week</td><td>Machine-based or online key to prevent unauthorized use</td></tr>
+  <tr class="warn"><td>Code Signing (DLL + exe)</td><td>HIGH</td><td>1–2 days</td><td>Trusted certificate removes "Unknown publisher" warning (~$100/yr)</td></tr>
+  <tr><td>Multi-version Support</td><td>MEDIUM</td><td>2 days</td><td>Build separate DLLs for Revit 2023 / 2024 / 2025 / 2026</td></tr>
+  <tr><td>Mark Backup before overwrite</td><td>MEDIUM</td><td>1 day</td><td>Export existing marks to JSON file before any destructive operation</td></tr>
+  <tr><td>Error Logging</td><td>MEDIUM</td><td>1 day</td><td>Write errors to log file for remote debugging support</td></tr>
+  <tr><td>Autodesk App Store Listing</td><td>MEDIUM</td><td>3–5 days</td><td>Account, screenshots, EULA, pricing page, review process</td></tr>
+  <tr><td>Slanted Columns (LocationCurve)</td><td>LOW</td><td>2 days</td><td>Currently only handles vertical columns (LocationPoint)</td></tr>
+  <tr><td>Architectural Columns Option</td><td>LOW</td><td>1 day</td><td>Option to also number OST_Columns (not only structural)</td></tr>
+  <tr><td>Multi-language UI</td><td>LOW</td><td>2 days</td><td>Hebrew / English toggle in settings</td></tr>
+</table>
+
+<hr class="divider"/>
+
+<!-- 8. REVIT API -->
+<h2>8. Revit API Key Reference (for new developers)</h2>
+<table>
+  <tr><th>Parameter</th><th>API Name</th><th>Notes</th></tr>
+  <tr><td>Column mark — write here</td><td>ALL_MODEL_MARK</td><td>The field we number into</td></tr>
+  <tr><td>Grid intersection label</td><td>COLUMN_LOCATION_MARK</td><td>"A(64)-1(-46)" — auto-computed by Revit</td></tr>
+  <tr><td>Base level</td><td>FAMILY_BASE_LEVEL_PARAM</td><td>Returns a Level element reference</td></tr>
+  <tr><td>Top level</td><td>FAMILY_TOP_LEVEL_PARAM</td><td>Returns a Level element reference</td></tr>
+  <tr><td>Base offset</td><td>FAMILY_BASE_LEVEL_OFFSET_PARAM</td><td>In Revit internal feet (1 ft = 304.8 mm)</td></tr>
+  <tr><td>Structural material</td><td>STRUCTURAL_MATERIAL_PARAM</td><td>e.g. "Concrete, Cast-in-Place"</td></tr>
+  <tr><td>Column position</td><td>LocationPoint (.X, .Y)</td><td>In Revit internal feet</td></tr>
+  <tr><td>Category filter</td><td>OST_StructuralColumns</td><td>NOT OST_Columns (architectural)</td></tr>
+  <tr><td>Undo container</td><td>Transaction(doc, "name")</td><td>Required for any model change</td></tr>
+</table>
+
+<hr class="divider"/>
+
+<!-- 9. NEXT STEPS -->
+<h2>9. Recommended Next Steps (Sprints)</h2>
+<div class="grid2">
+  <div class="card">
+    <h4>Sprint 2 — Settings UI (1 week)</h4>
+    <ul>
+      <li>WPF settings dialog inside Revit</li>
+      <li>Preview table before applying marks</li>
+      <li>Per-floor range selection option</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Sprint 3 — Commercial (2 weeks)</h4>
+    <ul>
+      <li>License key activation system</li>
+      <li>Code signing certificate</li>
+      <li>Autodesk App Store listing</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Sprint 4 — Hardening (1 week)</h4>
+    <ul>
+      <li>Multi-version build (2023–2026)</li>
+      <li>Slanted column support</li>
+      <li>Mark backup before overwrite</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>Future — SaaS Integration</h4>
+    <ul>
+      <li>Use IColumnReader interface to plug into existing SaaS platform</li>
+      <li>Column data exportable as JSON for server-side processing</li>
+      <li>Cloud numbering rules shared across projects</li>
+    </ul>
+  </div>
+</div>
+
+<hr class="divider"/>
+<p class="subtitle">ELLAH-ColNum Pro · Built April 25, 2026 · C# 12 · .NET 8 · Revit 2025</p>
+<p class="subtitle">To save as PDF: open this file in any browser (Chrome/Edge) → Ctrl+P → Save as PDF</p>
+
+</body>
+</html>
