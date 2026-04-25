@@ -115,7 +115,7 @@ async function sendLicenseEmail(buyerEmail, buyerName, licenseKey, orderNumber) 
       'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
     },
     body: JSON.stringify({
-      from:    'ELLAH Engineering <license@ellah-colnum.com>',
+      from:    'ELLAH Engineering <onboarding@resend.dev>',
       to:      buyerEmail,
       subject: `Your ELLAH-ColNum Pro License Key — Order #${orderNumber || ''}`,
       html,
