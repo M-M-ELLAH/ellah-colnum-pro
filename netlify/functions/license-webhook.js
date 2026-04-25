@@ -108,23 +108,23 @@ async function sendLicenseEmail(buyerEmail, buyerName, licenseKey, orderNumber) 
 </body>
 </html>`;
 
-  const res = await fetch('https://api.resend.com/emails', {
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
     method:  'POST',
     headers: {
-      'Content-Type':  'application/json',
-      'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+      'api-key':      process.env.BREVO_API_KEY,
     },
     body: JSON.stringify({
-      from:    'ELLAH Engineering <onboarding@resend.dev>',
-      to:      buyerEmail,
-      subject: `Your ELLAH-ColNum Pro License Key — Order #${orderNumber || ''}`,
-      html,
+      sender:      { name: 'ELLAH Engineering', email: 'maor@mm-ellah.com' },
+      to:          [{ email: buyerEmail, name: buyerName || 'Engineer' }],
+      subject:     `Your ELLAH-ColNum Pro License Key — Order #${orderNumber || ''}`,
+      htmlContent: html,
     }),
   });
 
   if (!res.ok) {
     const txt = await res.text();
-    throw new Error(`Resend API error ${res.status}: ${txt}`);
+    throw new Error(`Brevo API error ${res.status}: ${txt}`);
   }
 }
 
