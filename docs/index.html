@@ -394,6 +394,40 @@
     .pnote { font-size: 0.78rem; color: var(--dim); margin-top: 1rem; }
     .pnote a { color: var(--cyan); text-decoration: none; }
 
+    /* Admin code toggle */
+    .admin-toggle {
+      font-size: 0.78rem; color: var(--dim); margin-top: 1.1rem;
+      text-align: center; cursor: pointer; user-select: none;
+      transition: color 0.2s;
+    }
+    .admin-toggle:hover { color: var(--cyan); }
+    .admin-box {
+      display: none; margin-top: 0.8rem;
+      background: rgba(0,0,0,0.35); border: 1px solid rgba(0,212,255,0.25);
+      border-radius: 10px; padding: 1rem 1.1rem;
+    }
+    .admin-box.open { display: block; animation: fadeIn 0.25s ease; }
+    .admin-box label {
+      display: block; font-size: 0.78rem; color: var(--dim); margin-bottom: 0.45rem;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .admin-row { display: flex; gap: 0.5rem; }
+    .admin-input {
+      flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(0,212,255,0.3);
+      border-radius: 7px; padding: 0.6rem 0.8rem; color: var(--text);
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.9rem; outline: none;
+      transition: border-color 0.2s;
+    }
+    .admin-input:focus { border-color: var(--cyan); }
+    .admin-submit {
+      background: rgba(0,212,255,0.15); border: 1px solid rgba(0,212,255,0.45);
+      color: var(--cyan); border-radius: 7px; padding: 0.6rem 1rem;
+      font-family: 'Space Grotesk', sans-serif; font-size: 0.88rem; font-weight: 700;
+      cursor: pointer; white-space: nowrap; transition: all 0.2s;
+    }
+    .admin-submit:hover { background: rgba(0,212,255,0.28); }
+    .admin-msg { font-size: 0.78rem; margin-top: 0.55rem; min-height: 1em; }
+
     /* ═══════════════════════════════════════
        FAQ
     ═══════════════════════════════════════ */
@@ -678,6 +712,17 @@
             Buy Now — Get Your License Key Instantly
           </a>
           <div class="pnote">License key by email within 5 minutes · <a href="mailto:ellah@ellah.co.il">ellah@ellah.co.il</a></div>
+
+          <!-- Admin / Office code -->
+          <div class="admin-toggle" onclick="toggleAdmin()">🔑 Have an office code?</div>
+          <div class="admin-box" id="adminBox">
+            <label>Enter your office / admin code</label>
+            <div class="admin-row">
+              <input class="admin-input" id="adminCode" type="text" placeholder="ELLAH-XXXX" autocomplete="off" onkeydown="if(event.key==='Enter')applyAdmin()" />
+              <button class="admin-submit" onclick="applyAdmin()">Apply →</button>
+            </div>
+            <div class="admin-msg" id="adminMsg"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -830,6 +875,45 @@ document.querySelectorAll('.fi').forEach(item=>{
     if(!o) item.classList.add('open');
   });
 });
+
+/* ── Admin / Office Code ── */
+const ADMIN_CODES = {
+  'ELLAH-OFFICE': 'ELLAH-OFFICE',
+  'MAORIEL2026':  'MAORIEL2026'
+};
+
+function toggleAdmin() {
+  const box = document.getElementById('adminBox');
+  box.classList.toggle('open');
+  if (box.classList.contains('open')) {
+    setTimeout(() => document.getElementById('adminCode').focus(), 50);
+  }
+}
+
+function applyAdmin() {
+  const raw  = document.getElementById('adminCode').value.trim().toUpperCase();
+  const msg  = document.getElementById('adminMsg');
+
+  if (!raw) {
+    msg.style.color = '#ff6b6b';
+    msg.textContent = 'Please enter a code.';
+    return;
+  }
+
+  if (ADMIN_CODES[raw]) {
+    msg.style.color = '#00d4ff';
+    msg.textContent = '✓ Code accepted — opening free checkout…';
+    setTimeout(() => {
+      window.open(
+        'https://maoriel.gumroad.com/l/mgnvzu?coupon=' + encodeURIComponent(raw),
+        '_blank'
+      );
+    }, 600);
+  } else {
+    msg.style.color = '#ff6b6b';
+    msg.textContent = '✗ Invalid code. Contact the office admin.';
+  }
+}
 </script>
 </body>
 </html>
