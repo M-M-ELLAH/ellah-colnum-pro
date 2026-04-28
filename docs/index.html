@@ -718,7 +718,7 @@
           <div class="admin-box" id="adminBox">
             <label>Enter your office / admin code</label>
             <div class="admin-row">
-              <input class="admin-input" id="adminCode" type="text" placeholder="ELLAH-XXXX" autocomplete="off" onkeydown="if(event.key==='Enter')applyAdmin()" />
+              <input class="admin-input" id="adminCode" type="text" placeholder="OFFICE-XXXX" autocomplete="off" onkeydown="if(event.key==='Enter')applyAdmin()" />
               <button class="admin-submit" onclick="applyAdmin()">Apply →</button>
             </div>
             <div class="admin-msg" id="adminMsg"></div>
@@ -878,6 +878,7 @@ document.querySelectorAll('.fi').forEach(item=>{
 
 /* ── Admin / Office Code ── */
 const ADMIN_CODES = {
+  'OFFICE1995':   'OFFICE1995',
   'ELLAH-OFFICE': 'ELLAH-OFFICE',
   'MAORIEL2026':  'MAORIEL2026'
 };
