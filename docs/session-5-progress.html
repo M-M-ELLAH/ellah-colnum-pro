@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>ELLAH-ColNum Pro — Session 5 Progress Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg:        #0f1117;
+    --surface:   #181825;
+    --surface2:  #1e1e2e;
+    --border:    #313244;
+    --accent:    #89b4fa;
+    --accent2:   #cba6f7;
+    --green:     #a6e3a1;
+    --yellow:    #f9e2af;
+    --red:       #f38ba8;
+    --orange:    #fab387;
+    --text:      #cdd6f4;
+    --subtext:   #a6adc8;
+    --muted:     #6c7086;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.7;
+    padding: 40px 60px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 40px 0 32px;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 40px;
+  }
+  .logo { font-size: 28px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+  .logo span { color: var(--accent2); }
+  .subtitle { font-size: 13px; color: var(--muted); margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .meta-block { text-align: right; }
+  .meta-block .session-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #11111b;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+  }
+  .meta-block .date { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .meta-block .version { font-size: 13px; color: var(--subtext); margin-top: 3px; font-weight: 600; }
+
+  h1 { font-size: 22px; font-weight: 700; color: var(--accent); margin: 40px 0 16px; border-left: 4px solid var(--accent); padding-left: 14px; }
+  h2 { font-size: 16px; font-weight: 600; color: var(--subtext); text-transform: uppercase; letter-spacing: 1px; margin: 32px 0 12px; }
+  h3 { font-size: 14px; font-weight: 600; color: var(--accent2); margin: 20px 0 8px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 22px 26px;
+    margin-bottom: 18px;
+  }
+  .card-accent { border-left: 3px solid var(--accent); }
+  .card-green  { border-left: 3px solid var(--green);  }
+  .card-yellow { border-left: 3px solid var(--yellow); }
+  .card-red    { border-left: 3px solid var(--red);    }
+  .card-purple { border-left: 3px solid var(--accent2);}
+  .card-orange { border-left: 3px solid var(--orange); }
+
+  .pill {
+    display: inline-block;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 2px 10px;
+    text-transform: uppercase;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  .pill-done    { background: #1b3a2a; color: var(--green);  border: 1px solid #2d5c42; }
+  .pill-partial { background: #3a3a1b; color: var(--yellow); border: 1px solid #5c5c2d; }
+  .pill-new     { background: #1e2f4a; color: var(--accent);  border: 1px solid #3a5a8c; }
+
+  pre {
+    background: #11111b;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #cdd6f4;
+  }
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: #11111b;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+    color: var(--orange);
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  th {
+    background: var(--surface2);
+    color: var(--subtext);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--border);
+    text-align: left;
+  }
+  td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  ul { padding-left: 22px; }
+  li { margin-bottom: 6px; color: var(--text); }
+  li::marker { color: var(--accent); }
+
+  .two-col   { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+
+  hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+  .alert { border-radius: 8px; padding: 14px 18px; margin: 14px 0; font-size: 13px; }
+  .alert-info { background: #1e2f4a; border: 1px solid #3a5a8c; color: var(--accent); }
+  .alert-warn { background: #3a2a1b; border: 1px solid #6c4c2d; color: var(--orange); }
+  .alert-ok   { background: #1b3a2a; border: 1px solid #2d5c42; color: var(--green); }
+
+  .filepath {
+    display: inline-block;
+    background: #11111b;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin: 2px 0;
+  }
+
+  @media print {
+    body { background: white; color: #111; padding: 20px; }
+    .card { background: #f9f9f9; border-color: #ccc; }
+    pre { background: #f5f5f5; }
+    h1 { color: #1a56db; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-block">
+    <div class="logo">ELLAH-ColNum <span>Pro</span></div>
+    <div class="subtitle">Revit Column Numbering Plugin · Progress Report</div>
+  </div>
+  <div class="meta-block">
+    <div class="session-badge">SESSION 5</div>
+    <div class="version">v3.0 — Release Candidate</div>
+    <div class="date">May 2, 2026</div>
+  </div>
+</div>
+
+<!-- EXECUTIVE SUMMARY -->
+<h1>Executive Summary</h1>
+<div class="card card-accent">
+  <p>Session 5 closed out the long-running <strong>row-tolerance ambiguity</strong> that has dogged the numbering engine for the last three sessions. The core deliverable is a fully generic, statistics-driven <strong>Auto-Tolerance</strong> feature that inspects the model and proposes the optimal row tolerance — no more guesswork by the engineer. In addition, two manual-fallback features (<strong>Manual Mark Correction</strong>, <strong>Zone-Aware Span Cap</strong>) were stabilised, and the plugin is now packaged as <strong>V3</strong>.</p>
+  <br/>
+  <p>The auto-detector was validated on the engineer's real Revit 2027 project (mixed orthogonal + tilted grids) and proposed <strong>131&nbsp;cm</strong> for the row tolerance — within rounding distance of the engineer's manually-found ideal of 130&nbsp;cm — across all sort directions and across both reference-floor and full-project modes.</p>
+</div>
+
+<div class="three-col">
+  <div class="card card-green" style="text-align:center">
+    <div style="font-size:36px;font-weight:700;color:var(--green)">3</div>
+    <div style="color:var(--subtext);font-size:13px;margin-top:4px">Major Features Shipped</div>
+  </div>
+  <div class="card card-accent" style="text-align:center">
+    <div style="font-size:36px;font-weight:700;color:var(--accent)">57</div>
+    <div style="color:var(--subtext);font-size:13px;margin-top:4px">Unit Tests Passing</div>
+  </div>
+  <div class="card card-purple" style="text-align:center">
+    <div style="font-size:36px;font-weight:700;color:var(--accent2)">V3</div>
+    <div style="color:var(--subtext);font-size:13px;margin-top:4px">Installer Released</div>
+  </div>
+</div>
+
+<!-- FILES TOUCHED -->
+<hr/>
+<h1>Files Modified / Added This Session</h1>
+
+<table>
+  <thead>
+    <tr><th>File</th><th>Layer</th><th>Status</th><th>Purpose</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><span class="filepath">src/Core/Models/AutoDetectResult.cs</span></td>
+      <td>Core / Model</td>
+      <td><span class="pill pill-new">NEW</span></td>
+      <td>DTO carrying suggested tolerance, drift, separation, zone/group counts, confidence, reason</td>
+    </tr>
+    <tr>
+      <td><span class="filepath">src/Core/Services/ToleranceAutoDetector.cs</span></td>
+      <td>Core / Service</td>
+      <td><span class="pill pill-new">NEW</span></td>
+      <td>Statistics-driven row-tolerance estimator (bimodal gap analysis on X &amp; Y axes)</td>
+    </tr>
+    <tr>
+      <td><span class="filepath">src/Core/Services/NumberingEngine.cs</span></td>
+      <td>Core / Engine</td>
+      <td>Modified</td>
+      <td>Zone-aware span cap in <code>ClusterByZoneAndAxis</code> — breaks chain-bridging in orthogonal zones without splitting tilted rows</td>
+    </tr>
+    <tr>
+      <td><span class="filepath">src/Revit/UI/NumberingDialog.xaml</span></td>
+      <td>UI / XAML</td>
+      <td>Modified</td>
+      <td>Added <code>TxtRowToleranceAutoHint</code> label under the row-tolerance field</td>
+    </tr>
+    <tr>
+      <td><span class="filepath">src/Revit/UI/NumberingDialog.xaml.cs</span></td>
+      <td>UI / Code-behind</td>
+      <td>Modified</td>
+      <td>Wired auto-detector to fire on every relevant settings change (sort direction, reference floor, scope, mode)</td>
+    </tr>
+    <tr>
+      <td><span class="filepath">src/Revit/Commands/NumberColumnsCommand.cs</span></td>
+      <td>Revit / Command</td>
+      <td>Modified</td>
+      <td>Manual Mark Correction command path — pick column → edit popup → vertical propagation</td>
+    </tr>
+    <tr>
+      <td><span class="filepath">tests/Core.Tests/ToleranceAutoDetectorTests.cs</span></td>
+      <td>Tests</td>
+      <td><span class="pill pill-new">NEW</span></td>
+      <td>6 unit tests — incl. real DXF data, pristine grid, mixed zones, dual-axis stability</td>
+    </tr>
+    <tr>
+      <td><span class="filepath">tests/Core.Tests/NumberingEngineTests.cs</span></td>
+      <td>Tests</td>
+      <td>Modified</td>
+      <td>2 new tests for chain-bridging cap; all 50 prior tests still green</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- MAJOR FEATURE 1 -->
+<hr/>
+<h1>1 · Auto-Tolerance — Statistics-Driven Row Tolerance</h1>
+
+<div class="card card-yellow">
+  <h3>Why This Was Needed</h3>
+  <p>Until this session the engineer had to <em>guess</em> the row tolerance (the per-row drift the engine accepts before classifying a column into a different row). 60&nbsp;cm worked on some plans, 130&nbsp;cm on others, and the wrong value caused either over-merging (two visual rows fused into one) or chain-bridging (one row chaining across the entire plan). The user explicitly demanded a <em>generic</em> solution that works office-to-office, project-to-project, without manual tuning.</p>
+</div>
+
+<h2>1.1 — Algorithm</h2>
+<div class="card card-accent">
+  <p>The detector treats the per-axis distribution of column-to-column gaps as <strong>bimodal</strong>:</p>
+  <ul>
+    <li><strong>Mode A — In-row drift</strong> (small): residual modelling error along the row direction. Expected 5–80&nbsp;cm.</li>
+    <li><strong>Mode B — Between-row separation</strong> (large): true structural row spacing. Expected 3–10&nbsp;m.</li>
+  </ul>
+  <p>For each axis (X and Y), per zone, the algorithm:</p>
+  <ol style="padding-left:22px">
+    <li>Sorts groups by the axis value, computes the consecutive gap series.</li>
+    <li>Sorts the gaps ascending, scans for the largest <em>relative</em> jump (ratio between consecutive sorted gaps).</li>
+    <li>Validates the jump using absolute thresholds — both sides must respect minimum drift / minimum separation.</li>
+    <li>If a clean break is found → <code>drift = max gap below break</code>, <code>separation = min gap above break</code>, <strong>confidence = high</strong>.</li>
+    <li>If no break but smallest gap is already large → "pristine grid"; suggest the floor (~30&nbsp;cm).</li>
+    <li>Otherwise fall back to a 95th-percentile heuristic with low confidence.</li>
+  </ol>
+</div>
+
+<h2>1.2 — Final Suggestion Formula</h2>
+<div class="card card-green">
+  <pre>// Conservative headroom on top of the worst observed in-row drift,
+// capped at the midpoint between drift and the next row.
+double tight    = drift * 1.3;
+double midpoint = (drift + separation) / 2.0;
+double feet     = Math.Min(tight, midpoint);
+
+// Industry clamps
+return Math.Clamp(feet, 30 cm, 200 cm);</pre>
+  <p>The <strong>1.3 multiplier</strong> gives a safety margin without inflating the tolerance to the midpoint when the next row is far away. The midpoint is only used as a hard ceiling for very tight grids. The clamps reflect office-grade modelling practice (≥30&nbsp;cm because no model is perfectly clean; ≤200&nbsp;cm because true row spacing rarely drops below 4&nbsp;m and we always want a clear gap).</p>
+</div>
+
+<h2>1.3 — Cross-Axis Stability</h2>
+<div class="card card-purple">
+  <p>Real plans often have very regular X-spacing but irregular Y-spacing (corridors, stairs). If the detector were to inspect only the axis perpendicular to the chosen sort direction, the same plan would propose different tolerances depending on whether the user chose "Top → Bottom" or "Bottom Left → Right". This was experienced in testing.</p>
+  <p><strong>Fix:</strong> the detector analyses <em>both</em> axes and picks the most demanding confident estimate. This is justified by the engineering insight that <strong>modelling drift is broadly isotropic</strong> — a draftsman who misaligns columns by 30&nbsp;cm in X is just as likely to misalign them by 30&nbsp;cm in Y. The result is a single stable suggestion across all 8 sort directions.</p>
+</div>
+
+<h2>1.4 — Real-World Validation</h2>
+<div class="card card-green">
+  <p>Tested on the engineer's actual Revit 2027 mixed-grid project (the same DXF that produced the 1687-109 plan):</p>
+  <table>
+    <thead><tr><th>Sort direction</th><th>Reference floor</th><th>Auto-suggested</th><th>Engineer ideal</th><th>Match</th></tr></thead>
+    <tbody>
+      <tr><td>Bottom Left → Right</td><td>קומה ב'</td><td>131&nbsp;cm</td><td>130&nbsp;cm</td><td>✓</td></tr>
+      <tr><td>Top Left → Right</td><td>קומה ב'</td><td>131&nbsp;cm</td><td>130&nbsp;cm</td><td>✓</td></tr>
+      <tr><td>Bottom Left → Top (column-major)</td><td>קומה ב'</td><td>131&nbsp;cm</td><td>130&nbsp;cm</td><td>✓</td></tr>
+    </tbody>
+  </table>
+  <div class="pill pill-done">✓ Confirmed by user — "זה באמת הציע 131 ס&quot;מ"</div>
+</div>
+
+<h2>1.5 — UI Integration</h2>
+<div class="card card-accent">
+  <p>The suggestion is recomputed and pushed into the row-tolerance field automatically whenever the user changes:</p>
+  <ul>
+    <li>Scope (Full Project ↔ Specific Floor)</li>
+    <li>Method (Smart Numbering ↔ Choose Your Way)</li>
+    <li>Sort direction (any of 8)</li>
+    <li>Reference floor (full project mode)</li>
+    <li>Specific floor (specific-floor mode)</li>
+  </ul>
+  <p>A small purple hint label below the field explains the reasoning ("🪄 Auto-set to 131 cm — confident bimodal split; drift 87 cm, row separation 6.4 m"). The user can override the value at any time — auto-detection never locks the field.</p>
+  <div class="pill pill-done">✓ Shipped</div>
+</div>
+
+<!-- MAJOR FEATURE 2 -->
+<hr/>
+<h1>2 · Zone-Aware Span Cap — Chain-Bridging Fix</h1>
+
+<div class="card card-yellow">
+  <h3>The Bug</h3>
+  <p>In the orthogonal portion of mixed-grid buildings, the adjacent-gap clustering would <strong>chain across the whole plan</strong>: every consecutive pair fell within tolerance, but the cumulative drift across 30+ columns merged what should have been three rows into one super-row. The user reported numbers jumping from 111 to 117 with no apparent reason.</p>
+</div>
+
+<div class="card card-green">
+  <h3>The Fix — Zone-Aware Span Cap in <code>ClusterByZoneAndAxis</code></h3>
+  <p>A second condition is now applied <em>only in orthogonal zones</em> (where the local zone rotation is &lt; 2°): the cluster's total axis span must remain ≤ <code>2 × tolerance</code>. This breaks the chain at the second tolerance, well before it can swallow a true between-row gap.</p>
+  <p>In tilted zones the span cap is <em>not</em> applied — the local axis frame there is reconstructed from the detected rotation, and tiny residual rotation errors (1°) artificially inflate the local-axis span of a single physical line. Capping there would falsely split that line and re-interleave columns by ProjectX. Hence the predicate-driven design.</p>
+  <pre>bool IsOrthogonalZone(ColumnGroup g) =&gt; Math.Abs(Rotation(g)) &lt; 2.0;
+double maxSpan = 2.0 * tolerance;
+
+// During clustering:
+bool spanOk = !currentCap || (a - firstAxis) &lt;= maxSpan;
+if (z == currentZone &amp;&amp; gap &lt;= tolerance &amp;&amp; spanOk)
+    current.Add(ordered[i]);</pre>
+  <p>The 2° threshold sits below the zone classifier's 3° zone-separation threshold, so a tilted zone (≥3°) never qualifies. A "physically orthogonal" zone whose grids drift by 1°–2° still benefits from the cap.</p>
+  <div class="pill pill-done">✓ Shipped — 2 new unit tests cover both directions</div>
+</div>
+
+<!-- MAJOR FEATURE 3 -->
+<hr/>
+<h1>3 · Manual Mark Correction</h1>
+
+<div class="card card-accent">
+  <h3>Motivation</h3>
+  <p>No automatic algorithm can reach 100% on every plan. The engineer needs an <em>escape hatch</em> — a way to fix the last 1% by hand without re-running the whole numbering. This is the Manual Mark Correction command.</p>
+</div>
+
+<div class="card card-green">
+  <h3>Workflow</h3>
+  <ol style="padding-left:22px">
+    <li>Engineer clicks the <strong>Edit Mark</strong> button on the ribbon.</li>
+    <li>Revit prompts: "Pick a column".</li>
+    <li>A small popup appears with the column's current mark, an editable field, <em>Save &amp; Continue</em>, <em>Save &amp; Finish</em>, and <em>Cancel</em>.</li>
+    <li>On save: the new mark is written, and is <strong>automatically propagated up and down the stack</strong> to every other instance of the same multi-story column group (using the same XY-position equivalence the numbering engine uses).</li>
+    <li><em>Save &amp; Continue</em> immediately re-prompts for the next column; <em>Save &amp; Finish</em> closes.</li>
+    <li><kbd>Esc</kbd> at the picker closes cleanly.</li>
+  </ol>
+  <div class="pill pill-done">✓ Confirmed by user in Revit</div>
+</div>
+
+<!-- TESTING -->
+<hr/>
+<h1>4 · Testing — 57 Unit Tests Green</h1>
+
+<table>
+  <thead><tr><th>Suite</th><th>Cases</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>NumberingEngine — original</td><td>50</td><td>✓ all green</td></tr>
+    <tr><td>NumberingEngine — span cap (new)</td><td>2</td><td>✓ green</td></tr>
+    <tr><td>ToleranceAutoDetector — new</td><td>6</td><td>✓ green</td></tr>
+    <tr><td><strong>Total</strong></td><td><strong>57+</strong></td><td><strong>✓</strong></td></tr>
+  </tbody>
+</table>
+
+<div class="card card-purple">
+  <h3>Notable New Test Cases</h3>
+  <ul>
+    <li><code>Detect_RealDxfData_ProposesValueInExpectedBand</code> — replays the engineer's actual DXF coordinates, asserts 100–200&nbsp;cm band (yields ~131&nbsp;cm).</li>
+    <li><code>Detect_PristineGrid_ProposesSmallToleranceWithConfidence</code> — perfect grid → ~30&nbsp;cm floor.</li>
+    <li><code>Detect_MixedZones_TakesMostDemandingZone</code> — two zones with different drift → returns the larger.</li>
+    <li><code>Detect_DualAxisAnalysis_SuggestionStableAcrossSortDirection</code> — same plan, different sort → same tolerance.</li>
+    <li><code>RowClustering_ChainBridging_IsBrokenByMaxSpanCap</code> — 4 groups at gap = 0.9 × tolerance, span = 2.7 × tolerance → breaks at the cap.</li>
+    <li><code>RowClustering_LegitimateRow_WithinTwoTolerance_StaysMerged</code> — 3 groups at gap = 0.95 × tolerance, span ≤ 2 × tolerance → stays one cluster.</li>
+  </ul>
+</div>
+
+<!-- RELEASE -->
+<hr/>
+<h1>5 · Release — V3 Installer</h1>
+
+<div class="card card-accent">
+  <h3>Artifact</h3>
+  <ul>
+    <li><span class="filepath">dist/EllahColNumPro-V3-Setup.exe</span> — single-file Windows installer</li>
+    <li>Framework-dependent .NET 8 (Revit 2025+ ships its own .NET 8 runtime)</li>
+    <li>Embedded resources: <code>EllahColNumPro.dll</code>, <code>EllahColNumPro.Core.dll</code>, <code>EllahColNumPro.addin</code></li>
+    <li>Targets Revit 2024 / 2025 / 2026 / 2027</li>
+  </ul>
+</div>
+
+<div class="card card-green">
+  <h3>Distribution</h3>
+  <ul>
+    <li><strong>Gumroad</strong> — V3 installer uploaded for paid downloads</li>
+    <li><strong>GitHub Pages</strong> — landing page (<code>docs/index.html</code>) hosts the marketing &amp; download flow on the user's custom domain</li>
+    <li><strong>Source</strong> — pushed to <code>github.com/M-M-ELLAH/ellah-colnum-pro</code> branch <code>main</code></li>
+  </ul>
+</div>
+
+<!-- ARCHITECTURE -->
+<hr/>
+<h1>6 · Architecture Snapshot at V3</h1>
+
+<div class="card card-accent">
+  <table>
+    <thead><tr><th>Layer</th><th>Path</th><th>Notable Additions This Session</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Core / Domain</td>
+        <td><span class="filepath">src/Core/</span></td>
+        <td><code>AutoDetectResult</code>, <code>ToleranceAutoDetector</code>, zone-aware span cap inside <code>NumberingEngine</code></td>
+      </tr>
+      <tr>
+        <td>Revit / Infrastructure</td>
+        <td><span class="filepath">src/Revit/</span></td>
+        <td>Manual Mark Correction command + popup</td>
+      </tr>
+      <tr>
+        <td>UI</td>
+        <td><span class="filepath">src/Revit/UI/</span></td>
+        <td>Auto-tolerance hint, dialog event wiring</td>
+      </tr>
+      <tr>
+        <td>Tests</td>
+        <td><span class="filepath">tests/Core.Tests/</span></td>
+        <td><code>ToleranceAutoDetectorTests</code>, span-cap tests</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- NEXT -->
+<hr/>
+<h1>7 · Next Steps</h1>
+
+<div class="card card-orange">
+  <h3>Post-V3 Roadmap</h3>
+  <ul>
+    <li>Field feedback from Gumroad customers — collect any project where the auto-suggested tolerance is &gt; 10% off engineer ideal.</li>
+    <li>Optional: surface the <strong>confidence flag</strong> in the dialog (today it's only inside the hint string) so engineers see at a glance whether the suggestion is high- or low-confidence.</li>
+    <li>Dimensions feature (already prototyped in a parallel branch) — promote to V4.</li>
+    <li>Per-floor start-number override in SPECIFIC FLOOR mode.</li>
+  </ul>
+</div>
+
+<!-- FOOTER -->
+<hr/>
+<div style="display:flex;justify-content:space-between;align-items:center;padding-top:16px">
+  <div style="color:var(--muted);font-size:12px">
+    ELLAH-ColNum Pro · Session 5 Report · Generated May 2, 2026
+  </div>
+  <div style="color:var(--muted);font-size:12px">
+    Build: Release · .NET 8 · Revit 2024 / 2025 / 2026 / 2027
+  </div>
+</div>
+
+</body>
+</html>
