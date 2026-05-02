@@ -1,0 +1,369 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="EllahColNum.Revit.Dimensions.UI.DimensionDialog"
+        Title="ELLAH-ColNum Pro — Smart Grid Dimensions"
+        Width="680" Height="620"
+        MinWidth="560" MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        Background="#1E1E2E"
+        FontFamily="Segoe UI"
+        ResizeMode="CanResizeWithGrip">
+
+  <Window.Resources>
+
+    <!-- ── Dark ComboBoxItem ───────────────────────────────────────── -->
+    <Style TargetType="ComboBoxItem">
+      <Setter Property="Background"   Value="#252535"/>
+      <Setter Property="Foreground"   Value="#CDD6F4"/>
+      <Setter Property="Padding"      Value="10,6"/>
+      <Setter Property="FontSize"     Value="12"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ComboBoxItem">
+            <Border x:Name="ItemBd" Background="{TemplateBinding Background}"
+                    Padding="{TemplateBinding Padding}">
+              <ContentPresenter/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsHighlighted" Value="True">
+                <Setter TargetName="ItemBd" Property="Background" Value="#313244"/>
+              </Trigger>
+              <Trigger Property="IsSelected" Value="True">
+                <Setter TargetName="ItemBd" Property="Background" Value="#3c3f5c"/>
+                <Setter Property="Foreground" Value="#89B4FA"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- ── Dark ComboBox ──────────────────────────────────────────── -->
+    <Style TargetType="ComboBox">
+      <Setter Property="Background"      Value="#313244"/>
+      <Setter Property="Foreground"      Value="#CDD6F4"/>
+      <Setter Property="BorderBrush"     Value="#45475A"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding"         Value="8,5"/>
+      <Setter Property="FontSize"        Value="12"/>
+      <Setter Property="Height"          Value="30"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ComboBox">
+            <Grid>
+              <ToggleButton x:Name="ToggleBtn" Focusable="False"
+                            IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay,
+                                        RelativeSource={RelativeSource TemplatedParent}}"
+                            ClickMode="Press">
+                <ToggleButton.Template>
+                  <ControlTemplate TargetType="ToggleButton">
+                    <Border x:Name="TgBd" Background="#313244"
+                            BorderBrush="#45475A" BorderThickness="1" CornerRadius="3">
+                      <Grid>
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="*"/>
+                          <ColumnDefinition Width="24"/>
+                        </Grid.ColumnDefinitions>
+                        <ContentPresenter Grid.Column="0" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                        <Path Grid.Column="1" Data="M 0 0 L 4 4 L 8 0 Z"
+                              Fill="#8892A4" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                      </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                      <Trigger Property="IsMouseOver" Value="True">
+                        <Setter TargetName="TgBd" Property="BorderBrush" Value="#89B4FA"/>
+                      </Trigger>
+                      <Trigger Property="IsChecked" Value="True">
+                        <Setter TargetName="TgBd" Property="BorderBrush" Value="#89B4FA"/>
+                      </Trigger>
+                    </ControlTemplate.Triggers>
+                  </ControlTemplate>
+                </ToggleButton.Template>
+              </ToggleButton>
+
+              <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False"
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                Margin="10,0,28,0" VerticalAlignment="Center"/>
+
+              <Popup x:Name="Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}"
+                     AllowsTransparency="True" Focusable="False" PopupAnimation="Slide">
+                <Grid SnapsToDevicePixels="True"
+                      MinWidth="{TemplateBinding ActualWidth}"
+                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                  <Border Background="#252535" BorderBrush="#45475A" BorderThickness="1"
+                          CornerRadius="0,0,3,3">
+                    <ScrollViewer SnapsToDevicePixels="True">
+                      <StackPanel IsItemsHost="True"
+                                  KeyboardNavigation.DirectionalNavigation="Contained"/>
+                    </ScrollViewer>
+                  </Border>
+                </Grid>
+              </Popup>
+            </Grid>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <!-- ── TextBox ────────────────────────────────────────────────── -->
+    <Style TargetType="TextBox">
+      <Setter Property="Background"               Value="#313244"/>
+      <Setter Property="Foreground"               Value="#CDD6F4"/>
+      <Setter Property="BorderBrush"              Value="#45475A"/>
+      <Setter Property="BorderThickness"          Value="1"/>
+      <Setter Property="Padding"                  Value="8,5"/>
+      <Setter Property="FontSize"                 Value="12"/>
+      <Setter Property="Height"                   Value="30"/>
+      <Setter Property="CaretBrush"               Value="#89B4FA"/>
+      <Setter Property="SelectionBrush"           Value="#89B4FA"/>
+      <Setter Property="VerticalContentAlignment" Value="Center"/>
+      <Style.Triggers>
+        <Trigger Property="IsFocused"     Value="True">
+          <Setter Property="BorderBrush" Value="#89B4FA"/>
+        </Trigger>
+        <Trigger Property="IsMouseOver"   Value="True">
+          <Setter Property="BorderBrush" Value="#6C7086"/>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+
+    <!-- ── Section label ─────────────────────────────────────────── -->
+    <Style x:Key="LabelStyle" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="#8892A4"/>
+      <Setter Property="FontSize"   Value="10"/>
+      <Setter Property="FontWeight" Value="SemiBold"/>
+      <Setter Property="Margin"     Value="0,0,0,5"/>
+    </Style>
+
+    <!-- ── Hint text ─────────────────────────────────────────────── -->
+    <Style x:Key="HintStyle" TargetType="TextBlock">
+      <Setter Property="Foreground" Value="#45475A"/>
+      <Setter Property="FontSize"   Value="10"/>
+      <Setter Property="Margin"     Value="0,4,0,0"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+
+    <!-- ── Buttons ────────────────────────────────────────────────── -->
+    <Style x:Key="BtnBase" TargetType="Button">
+      <Setter Property="FontSize"        Value="13"/>
+      <Setter Property="FontWeight"      Value="SemiBold"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding"         Value="22,9"/>
+      <Setter Property="Cursor"          Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border x:Name="Bd" Background="{TemplateBinding Background}"
+                    CornerRadius="5" Padding="{TemplateBinding Padding}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Bd" Property="Opacity" Value="0.85"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="BtnPrimary" TargetType="Button" BasedOn="{StaticResource BtnBase}">
+      <Setter Property="Background" Value="#89B4FA"/>
+      <Setter Property="Foreground" Value="#1E1E2E"/>
+    </Style>
+
+    <Style x:Key="BtnSecondary" TargetType="Button" BasedOn="{StaticResource BtnBase}">
+      <Setter Property="Background" Value="#313244"/>
+      <Setter Property="Foreground" Value="#CDD6F4"/>
+    </Style>
+
+    <!-- ── CheckBox (for grid direction toggles) ─────────────────── -->
+    <Style x:Key="OptionCheckBox" TargetType="CheckBox">
+      <Setter Property="Foreground" Value="#CDD6F4"/>
+      <Setter Property="FontSize"   Value="12"/>
+    </Style>
+
+    <!-- ── CheckBox (for view list items) ────────────────────────── -->
+    <Style x:Key="ViewCheckBox" TargetType="CheckBox">
+      <Setter Property="Foreground" Value="#CDD6F4"/>
+      <Setter Property="FontSize"   Value="12"/>
+      <Setter Property="Margin"     Value="0,3"/>
+    </Style>
+
+    <!-- ── ListBox ────────────────────────────────────────────────── -->
+    <Style TargetType="ListBox">
+      <Setter Property="Background"      Value="#181825"/>
+      <Setter Property="BorderBrush"     Value="#45475A"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Padding"         Value="6"/>
+      <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+    </Style>
+
+    <Style TargetType="ListBoxItem">
+      <Setter Property="Padding"    Value="4,2"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ListBoxItem">
+            <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+              <ContentPresenter/>
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+  </Window.Resources>
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>   <!-- Header -->
+      <RowDefinition Height="1"/>      <!-- Divider -->
+      <RowDefinition Height="Auto"/>   <!-- Settings -->
+      <RowDefinition Height="1"/>      <!-- Divider -->
+      <RowDefinition Height="Auto"/>   <!-- Views bar -->
+      <RowDefinition Height="*"/>      <!-- View ListBox -->
+      <RowDefinition Height="Auto"/>   <!-- Bottom bar -->
+    </Grid.RowDefinitions>
+
+    <!-- ── Header ─────────────────────────────────────────────────── -->
+    <Border Grid.Row="0" Background="#181825" Padding="24,18,24,16">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center">
+          <TextBlock Text="ELLAH-ColNum Pro"
+                     FontSize="20" FontWeight="Bold" Foreground="#89B4FA"/>
+          <TextBlock Text="Smart Grid Dimensions — Phase 1"
+                     FontSize="12" Foreground="#6C7086" Margin="0,3,0,0"/>
+        </StackPanel>
+        <!-- Grid count stat badges -->
+        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+          <Border Background="#1e2e20" CornerRadius="12" Padding="12,5" Margin="0,0,8,0"
+                  ToolTip="Number of N-S (vertical) grid lines found">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock x:Name="TxtVerticalCount" FontSize="18" FontWeight="Bold" Foreground="#A6E3A1"/>
+              <TextBlock Text=" vertical" FontSize="11" Foreground="#6C7086"
+                         VerticalAlignment="Bottom" Margin="0,0,0,2"/>
+            </StackPanel>
+          </Border>
+          <Border Background="#252540" CornerRadius="12" Padding="12,5"
+                  ToolTip="Number of E-W (horizontal) grid lines found">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock x:Name="TxtHorizontalCount" FontSize="18" FontWeight="Bold" Foreground="#89B4FA"/>
+              <TextBlock Text=" horizontal" FontSize="11" Foreground="#6C7086"
+                         VerticalAlignment="Bottom" Margin="0,0,0,2"/>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Rectangle Grid.Row="1" Fill="#313244"/>
+
+    <!-- ── Settings ───────────────────────────────────────────────── -->
+    <Border Grid.Row="2" Background="#1E1E2E" Padding="24,16">
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="12"/>
+          <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Row 1: Discipline / Dim style / Offset -->
+        <Grid Grid.Row="0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180"/>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="8"/>
+            <ColumnDefinition Width="70"/>
+          </Grid.ColumnDefinitions>
+
+          <StackPanel Grid.Column="0">
+            <TextBlock Text="VIEW DISCIPLINE FILTER" Style="{StaticResource LabelStyle}"/>
+            <ComboBox x:Name="CmbDiscipline"
+                      SelectionChanged="CmbDiscipline_SelectionChanged"
+                      ToolTip="Filter the view list to only show views of this discipline"/>
+          </StackPanel>
+
+          <StackPanel Grid.Column="2">
+            <TextBlock Text="DIMENSION STYLE" Style="{StaticResource LabelStyle}"/>
+            <ComboBox x:Name="CmbDimStyle"
+                      ToolTip="Revit DimensionType to use. Leave as default to use the project default."/>
+          </StackPanel>
+
+          <StackPanel Grid.Column="4">
+            <TextBlock Text="OFFSET FROM GRID" Style="{StaticResource LabelStyle}"/>
+            <TextBox x:Name="TxtOffset" Text="1.0"
+                     ToolTip="Distance from the outermost grid endpoint to the dimension string"/>
+          </StackPanel>
+
+          <StackPanel Grid.Column="6" VerticalAlignment="Bottom">
+            <TextBlock Text="m" Foreground="#8892A4" FontSize="12" Margin="0,0,0,8"
+                       VerticalAlignment="Bottom"/>
+          </StackPanel>
+        </Grid>
+
+        <!-- Row 2: Grid direction checkboxes -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal">
+          <TextBlock Text="DIMENSION:" Style="{StaticResource LabelStyle}"
+                     VerticalAlignment="Center" Margin="0,0,14,0"/>
+          <CheckBox x:Name="ChkVertical" Content="Vertical grid lines (N-S)"
+                    Style="{StaticResource OptionCheckBox}"
+                    IsChecked="True" Margin="0,0,24,0"
+                    Checked="ChkDirection_Changed" Unchecked="ChkDirection_Changed"
+                    ToolTip="Create a horizontal dimension string measuring spacing between N-S grids"/>
+          <CheckBox x:Name="ChkHorizontal" Content="Horizontal grid lines (E-W)"
+                    Style="{StaticResource OptionCheckBox}"
+                    IsChecked="True"
+                    Checked="ChkDirection_Changed" Unchecked="ChkDirection_Changed"
+                    ToolTip="Create a vertical dimension string measuring spacing between E-W grids"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <Rectangle Grid.Row="3" Fill="#313244"/>
+
+    <!-- ── Views bar ──────────────────────────────────────────────── -->
+    <Border Grid.Row="4" Background="#181825" Padding="24,10">
+      <Grid>
+        <TextBlock Text="SELECT VIEWS TO DIMENSION"
+                   Style="{StaticResource LabelStyle}" VerticalAlignment="Center"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+          <Button Content="Select All" Style="{StaticResource BtnSecondary}"
+                  Padding="14,5" FontSize="11" Click="SelectAllViews_Click" Margin="0,0,8,0"/>
+          <Button Content="Clear All" Style="{StaticResource BtnSecondary}"
+                  Padding="14,5" FontSize="11" Click="ClearAllViews_Click"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- ── View ListBox ───────────────────────────────────────────── -->
+    <ListBox x:Name="ViewListBox" Grid.Row="5" Margin="24,0,24,0"
+             ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+
+    <!-- ── Bottom bar ─────────────────────────────────────────────── -->
+    <Border Grid.Row="6" Background="#181825" Padding="24,14">
+      <Grid>
+        <Grid.ColumnDefinitions>
+          <ColumnDefinition Width="*"/>
+          <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="10"/>
+          <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <TextBlock x:Name="TxtSummary" Foreground="#6C7086" FontSize="12" VerticalAlignment="Center"/>
+        <Button x:Name="CancelBtn" Grid.Column="1" Content="Cancel"
+                Style="{StaticResource BtnSecondary}" Click="CancelBtn_Click"/>
+        <Button x:Name="ApplyBtn" Grid.Column="3" Content="▶  Apply Dimensions  (Enter)"
+                Style="{StaticResource BtnPrimary}" Click="ApplyBtn_Click" IsDefault="True"/>
+      </Grid>
+    </Border>
+
+  </Grid>
+</Window>

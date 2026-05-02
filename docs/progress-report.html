@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ELLAH-ColNum Pro — Project Progress Report</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:       #0f1117;
+    --ink2:      #2d3142;
+    --muted:     #5a6072;
+    --light:     #8892a4;
+    --border:    #dde1ea;
+    --bg:        #f7f8fc;
+    --card:      #ffffff;
+    --accent:    #1a56db;
+    --accent2:   #0e3fb0;
+    --green:     #057a55;
+    --orange:    #b45309;
+    --red:       #b91c1c;
+    --tag-bg:    #eff6ff;
+    --tag-green: #ecfdf5;
+    --tag-orange:#fffbeb;
+    --tag-red:   #fef2f2;
+  }
+
+  html { font-size: 13px; }
+  body {
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+
+  /* ── Page wrapper ── */
+  .page {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--card);
+    padding: 0;
+  }
+
+  /* ── Cover ── */
+  .cover {
+    background: var(--ink);
+    color: #fff;
+    padding: 56px 56px 44px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::after {
+    content: '';
+    position: absolute; right: -60px; top: -60px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    border: 60px solid rgba(26,86,219,0.18);
+    pointer-events: none;
+  }
+  .cover-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: rgba(255,255,255,0.45);
+    margin-bottom: 18px;
+  }
+  .cover h1 {
+    font-size: 32px; font-weight: 800; line-height: 1.15;
+    color: #fff; margin-bottom: 10px;
+  }
+  .cover h1 span { color: #5b8dee; }
+  .cover-sub {
+    font-size: 13px; color: rgba(255,255,255,0.55);
+    margin-bottom: 36px;
+  }
+  .cover-stats {
+    display: grid; grid-template-columns: repeat(4,1fr); gap: 20px;
+    margin-top: 32px;
+  }
+  .cstat { border-left: 2px solid rgba(255,255,255,0.15); padding-left: 14px; }
+  .cstat-val { font-size: 26px; font-weight: 800; color: #5b8dee; }
+  .cstat-label { font-size: 10px; color: rgba(255,255,255,0.45); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 2px; }
+
+  /* ── Body ── */
+  .body { padding: 40px 56px 64px; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 40px; }
+  .section-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 6px;
+  }
+  h2 {
+    font-size: 18px; font-weight: 700; color: var(--ink);
+    margin-bottom: 14px; padding-bottom: 10px;
+    border-bottom: 2px solid var(--border);
+  }
+  h3 {
+    font-size: 12px; font-weight: 700; color: var(--ink2);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 20px 0 8px;
+  }
+  p { color: var(--ink2); margin-bottom: 10px; line-height: 1.7; }
+
+  /* ── Cards grid ── */
+  .cards { display: grid; gap: 14px; margin-bottom: 16px; }
+  .cards-2 { grid-template-columns: 1fr 1fr; }
+  .cards-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 16px 18px;
+  }
+  .card-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--light); margin-bottom: 10px;
+  }
+  .kv { display: flex; gap: 6px; margin-bottom: 5px; align-items: baseline; }
+  .kv-key { font-size: 11px; font-weight: 600; color: var(--muted); min-width: 90px; flex-shrink: 0; }
+  .kv-val { font-size: 11px; color: var(--ink2); }
+
+  /* ── Table ── */
+  .tbl-wrap { overflow-x: auto; margin: 10px 0 18px; border-radius: 8px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 11.5px; }
+  thead tr { background: var(--ink); color: #fff; }
+  thead th { padding: 9px 14px; text-align: left; font-weight: 600; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; }
+  tbody tr:nth-child(even) { background: #f9fafc; }
+  tbody tr:hover { background: #eff6ff; }
+  tbody td { padding: 8px 14px; color: var(--ink2); border-top: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+  tbody td:first-child { font-weight: 500; color: var(--ink); }
+
+  /* ── Code ── */
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.88em; background: #eef2ff; color: var(--accent2);
+    padding: 1px 5px; border-radius: 3px; white-space: nowrap;
+  }
+  .code-block {
+    background: #0f1117; color: #c9d1d9;
+    border-radius: 8px; padding: 16px 18px; margin: 10px 0;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    line-height: 1.7; overflow-x: auto;
+  }
+  .code-block .cm { color: #6e7681; }
+  .code-block .kw { color: #ff7b72; }
+  .code-block .fn { color: #d2a8ff; }
+  .code-block .st { color: #a5d6ff; }
+  .code-block .nu { color: #79c0ff; }
+
+  /* ── Badge ── */
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 20px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .badge-green  { background: var(--tag-green);  color: var(--green); }
+  .badge-orange { background: var(--tag-orange); color: var(--orange); }
+  .badge-red    { background: var(--tag-red);    color: var(--red); }
+  .badge-blue   { background: var(--tag-bg);     color: var(--accent); }
+  .badge-gray   { background: #f1f3f7;           color: var(--muted); }
+
+  /* ── Callout ── */
+  .callout {
+    border-left: 3px solid; border-radius: 0 8px 8px 0;
+    padding: 12px 16px; margin: 14px 0; font-size: 11.5px; line-height: 1.65;
+  }
+  .callout-warn  { border-color: #f59e0b; background: #fffbeb; color: #78350f; }
+  .callout-info  { border-color: #3b82f6; background: #eff6ff; color: #1e3a8a; }
+  .callout-ok    { border-color: #10b981; background: var(--tag-green); color: #064e3b; }
+  .callout strong { font-weight: 700; }
+
+  /* ── Flow steps ── */
+  .steps { margin: 12px 0; }
+  .step { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 10px; }
+  .step-num {
+    width: 24px; height: 24px; border-radius: 50%; background: var(--accent);
+    color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step-body { font-size: 11.5px; color: var(--ink2); padding-top: 3px; }
+  .step-body strong { color: var(--ink); }
+
+  /* ── Roadmap cards ── */
+  .road-card {
+    border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 10px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .road-body { flex: 1; }
+  .road-title { font-size: 12px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .road-desc  { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  /* ── Divider ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+
+  /* ── Footer ── */
+  .footer {
+    background: var(--ink); color: rgba(255,255,255,0.4);
+    padding: 20px 56px; font-size: 10px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .footer a { color: rgba(255,255,255,0.55); text-decoration: none; }
+
+  /* ── Print ── */
+  @media print {
+    html { font-size: 11px; }
+    body { background: #fff; }
+    .page { max-width: 100%; }
+    .cover { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .cover::after { display: none; }
+    thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .code-block { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .callout { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .footer { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .section { page-break-inside: avoid; }
+    h2 { page-break-after: avoid; }
+    table { page-break-inside: avoid; }
+    .no-print { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- COVER -->
+  <div class="cover">
+    <div class="cover-label">Technical Project Documentation · April 2026</div>
+    <h1>ELLAH-ColNum <span>Pro</span></h1>
+    <div class="cover-sub">Full-stack commercial Revit plug-in · Sales platform · Automated license delivery</div>
+    <p style="color:rgba(255,255,255,0.55); font-size:12px; max-width:560px;">
+      This document covers every component of the ELLAH-ColNum Pro product: plugin architecture,
+      licensing system, sales website, payment automation, external services, file map,
+      and future upgrade roadmap. Intended for developer handoff, audits, and continued development.
+    </p>
+    <div class="cover-stats">
+      <div class="cstat"><div class="cstat-val">v1.0</div><div class="cstat-label">Plugin Released</div></div>
+      <div class="cstat"><div class="cstat-val">$49</div><div class="cstat-label">Price / License</div></div>
+      <div class="cstat"><div class="cstat-val">100%</div><div class="cstat-label">Auto Delivery</div></div>
+      <div class="cstat"><div class="cstat-val">4</div><div class="cstat-label">Revit Versions</div></div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <div class="body">
+
+    <!-- 1. Product Overview -->
+    <div class="section">
+      <div class="section-title">Section 01</div>
+      <h2>Product Overview</h2>
+      <p>
+        ELLAH-ColNum Pro is a commercial Revit plug-in that automatically numbers all structural columns
+        across all floors of a building model in under 3 seconds. It writes directly to Revit's standard
+        <code>MARK</code> parameter using a configurable North-West sort algorithm matching the Israeli
+        structural engineering convention. The product ships as a self-contained Windows installer
+        and is protected by an offline machine-bound license key system.
+      </p>
+      <div class="cards cards-2">
+        <div class="card">
+          <div class="card-title">Product Identity</div>
+          <div class="kv"><span class="kv-key">Name</span><span class="kv-val">ELLAH-ColNum Pro</span></div>
+          <div class="kv"><span class="kv-key">Version</span><span class="kv-val">1.0.0 (initial release)</span></div>
+          <div class="kv"><span class="kv-key">Runtime</span><span class="kv-val">.NET 8 (bundled in Revit 2024+)</span></div>
+          <div class="kv"><span class="kv-key">OS</span><span class="kv-val">Windows 10 / 11 (64-bit only)</span></div>
+          <div class="kv"><span class="kv-key">Revit</span><span class="kv-val">2024 · 2025 · 2026 · 2027</span></div>
+          <div class="kv"><span class="kv-key">Installer</span><span class="kv-val">EllahColNumPro-Setup.exe (228 KB)</span></div>
+          <div class="kv"><span class="kv-key">Price</span><span class="kv-val">$49 USD one-time, no subscription</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Core Capabilities</div>
+          <div class="kv"><span class="kv-key">Action</span><span class="kv-val">Numbers all OST_StructuralColumns across all levels</span></div>
+          <div class="kv"><span class="kv-key">Sort</span><span class="kv-val">North-West (top-left → right → next row), configurable</span></div>
+          <div class="kv"><span class="kv-key">Preview</span><span class="kv-val">Live table showing every column's number before commit</span></div>
+          <div class="kv"><span class="kv-key">Undo</span><span class="kv-val">Full Revit Transaction — single Ctrl+Z rolls everything back</span></div>
+          <div class="kv"><span class="kv-key">Custom</span><span class="kv-val">Start number, prefix, suffix, sort direction</span></div>
+          <div class="kv"><span class="kv-key">Safety</span><span class="kv-val">Never touches architectural columns or other elements</span></div>
+        </div>
+      </div>
+    </div>
+
+    <hr/>
+
+    <!-- 2. Plugin Architecture -->
+    <div class="section">
+      <div class="section-title">Section 02</div>
+      <h2>Plugin Technical Architecture</h2>
+
+      <h3>Technology Stack</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Layer</th><th>Technology</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>Plugin core</td><td>C# / .NET 8</td><td>Business logic, Revit API calls, column sorting algorithm</td></tr>
+            <tr><td>UI dialogs</td><td>WPF (XAML)</td><td>Main settings dialog with live preview DataGrid</td></tr>
+            <tr><td>Revit integration</td><td>Autodesk Revit API 2024</td><td>FilteredElementCollector, Transaction, MARK parameter write</td></tr>
+            <tr><td>Licensing</td><td>HMAC-SHA256 (.NET Cryptography)</td><td>Offline key generation + machine-bound validation</td></tr>
+            <tr><td>Installer</td><td>Inno Setup</td><td>One-click .exe — places .addin + .dll in correct Revit folder</td></tr>
+            <tr><td>Build</td><td>PowerShell + MSBuild</td><td>Compiles for all 4 Revit versions; packages into installer</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>License Key Algorithm</h3>
+      <p>
+        Keys are generated and validated entirely offline using HMAC-SHA256 with a private salt.
+        The algorithm produces a 20-character hex string formatted as <code>ELLAH-XXXXX-XXXXX-XXXXX-XXXXX</code>.
+        Each license is bound to a unique hardware-derived machine ID and stored at
+        <code>%APPDATA%\ELLAH\ColNumPro\license.dat</code>.
+      </p>
+      <div class="code-block">
+<span class="cm">// ── LicenseKey.cs — Core algorithm (simplified) ──────────────────────────</span>
+<span class="kw">private static readonly</span> <span class="fn">byte</span>[] _salt = Encoding.UTF8.GetBytes(<span class="st">"EllahColNumPro-2026-#Str@ngS@lt!"</span>);
+
+<span class="kw">public static string</span> <span class="fn">Generate</span>() {
+    <span class="kw">var</span> seed = RandomNumberGenerator.GetBytes(<span class="nu">5</span>);   <span class="cm">// 5 random bytes</span>
+    <span class="kw">var</span> hmac = <span class="fn">ComputeHmac</span>(seed);                    <span class="cm">// first 5 bytes of HMAC-SHA256</span>
+    <span class="kw">var</span> raw  = seed.Concat(hmac).ToArray();           <span class="cm">// 10 bytes = 20 hex chars</span>
+    <span class="kw">return</span> <span class="fn">Format</span>(Convert.ToHexString(raw));         <span class="cm">// ELLAH-XXXXX-XXXXX-XXXXX-XXXXX</span>
+}
+
+<span class="kw">public static bool</span> <span class="fn">Validate</span>(<span class="kw">string</span> key) {
+    <span class="kw">var</span> raw  = Convert.FromHexString(<span class="fn">Unformat</span>(key));
+    <span class="kw">var</span> seed = raw[..<span class="nu">5</span>];
+    <span class="kw">var</span> expected = <span class="fn">ComputeHmac</span>(seed);
+    <span class="kw">return</span> raw[<span class="nu">5</span>..].SequenceEqual(expected);        <span class="cm">// tamper-proof check</span>
+}
+      </div>
+
+      <h3>Key Source Files</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>File</th><th>Role</th></tr></thead>
+          <tbody>
+            <tr><td><code>src/Core/Licensing/LicenseKey.cs</code></td><td>Key generation + HMAC-SHA256 validation logic</td></tr>
+            <tr><td><code>src/Core/Licensing/LicenseValidator.cs</code></td><td>Machine-ID binding, file I/O, activation dialog trigger</td></tr>
+            <tr><td><code>src/UI/MainDialog.xaml + .cs</code></td><td>WPF settings dialog with live preview DataGrid</td></tr>
+            <tr><td><code>src/Core/ColumnNumberer.cs</code></td><td>North-West sort, FilteredElementCollector, MARK write</td></tr>
+            <tr><td><code>src/ELLAH-ColNum.addin</code></td><td>Revit manifest — loaded automatically by Revit on startup</td></tr>
+            <tr><td><code>dist/EllahColNumPro-Setup.exe</code></td><td>Final installer (also uploaded to Gumroad product content)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <hr/>
+
+    <!-- 3. Sales Website -->
+    <div class="section">
+      <div class="section-title">Section 03</div>
+      <h2>Sales Website</h2>
+
+      <div class="cards cards-2">
+        <div class="card">
+          <div class="card-title">Live URLs</div>
+          <div class="kv"><span class="kv-key">GitHub Pages</span><span class="kv-val">m-m-ellah.github.io/ellah-colnum-pro</span></div>
+          <div class="kv"><span class="kv-key">Netlify</span><span class="kv-val">ellah-colnum-pro.netlify.app</span></div>
+          <div class="kv"><span class="kv-key">Repository</span><span class="kv-val">github.com/M-M-ELLAH/ellah-colnum-pro</span></div>
+          <div class="kv"><span class="kv-key">Source file</span><span class="kv-val"><code>docs/index.html</code></span></div>
+          <div class="kv"><span class="kv-key">Stack</span><span class="kv-val">Pure HTML / CSS / JS — no framework, no build step</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Design System</div>
+          <div class="kv"><span class="kv-key">Design</span><span class="kv-val">Scroll-telling — 4 full-screen AI illustrations crossfade on scroll</span></div>
+          <div class="kv"><span class="kv-key">Fonts</span><span class="kv-val">Space Grotesk + Inter (Google Fonts)</span></div>
+          <div class="kv"><span class="kv-key">Accent</span><span class="kv-val"><code>#00d4ff</code> cyan on dark background</span></div>
+          <div class="kv"><span class="kv-key">Scroll tech</span><span class="kv-val">IntersectionObserver + requestAnimationFrame opacity transitions</span></div>
+          <div class="kv"><span class="kv-key">Images</span><span class="kv-val">4 AI-generated anime 3D illustrations (assets/*.png)</span></div>
+        </div>
+      </div>
+
+      <h3>Page Structure</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Section</th><th>Background</th><th>Content</th></tr></thead>
+          <tbody>
+            <tr><td>Hero</td><td>hero-v2.png</td><td>Headline, CTA button, animated stat counters, Revit version badges</td></tr>
+            <tr><td>Problem</td><td>bg-problem.png</td><td>3 pain point cards: wasted hours, human errors, re-numbering</td></tr>
+            <tr><td>Features</td><td>bg-features.png</td><td>6 feature cards: sort, all floors, live preview, structural-only, custom params, undo</td></tr>
+            <tr><td>How It Works</td><td>bg-features.png</td><td>3-step walkthrough with numbered step badges</td></tr>
+            <tr><td>Pricing</td><td>bg-pricing.png</td><td>$49 license card, buy button (→ Gumroad), admin/office coupon widget</td></tr>
+            <tr><td>FAQ</td><td>—</td><td>6 expandable Q&amp;A accordion items</td></tr>
+            <tr><td>Footer CTA</td><td>—</td><td>Final buy button, contact email, navigation links</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Admin / Office Code Widget</h3>
+      <p>
+        A collapsible "Have an office code?" toggle is placed below the main buy button in the Pricing section.
+        When clicked, a text input appears. Entering a valid admin code (e.g. <code>ELLAH-OFFICE</code>) displays
+        a confirmation message and redirects to Gumroad with the coupon applied via path URL:
+        <code>maoriel.gumroad.com/l/mgnvzu/ELLAH-OFFICE</code>.
+        The matching 100% discount must exist in Gumroad → Discounts (currently active: ELLAH-OFFICE, 100% off, max 50 uses).
+      </p>
+    </div>
+
+    <hr/>
+
+    <!-- 4. Payment & Automation -->
+    <div class="section">
+      <div class="section-title">Section 04</div>
+      <h2>Payment &amp; Automated License Delivery</h2>
+      <p>
+        The complete purchase-to-license pipeline requires zero manual intervention.
+        From the moment a customer completes payment on Gumroad, the license key is generated
+        and emailed automatically within seconds.
+      </p>
+
+      <h3>End-to-End Flow</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-body"><strong>Customer</strong> clicks "Buy Now" on the sales page → lands on Gumroad checkout ($49 USD)</div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-body"><strong>Gumroad</strong> processes payment via credit/debit card or PayPal</div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-body"><strong>Gumroad webhook</strong> fires an HTTP POST to the Netlify serverless function with buyer email, name, and order ID</div></div>
+        <div class="step"><div class="step-num">4</div><div class="step-body"><strong>Netlify function</strong> (<code>license-webhook.js</code>) validates the seller ID from environment variable</div></div>
+        <div class="step"><div class="step-num">5</div><div class="step-body"><strong>Netlify function</strong> generates a unique license key using the exact same HMAC-SHA256 algorithm as the C# plugin</div></div>
+        <div class="step"><div class="step-num">6</div><div class="step-body"><strong>Brevo API</strong> sends an HTML email to the buyer containing the license key and installation instructions</div></div>
+        <div class="step"><div class="step-num">7</div><div class="step-body"><strong>Customer</strong> downloads the installer from Gumroad, installs, and enters the license key in the activation dialog</div></div>
+      </div>
+
+      <div class="cards cards-2" style="margin-top:16px">
+        <div class="card">
+          <div class="card-title">Netlify Function</div>
+          <div class="kv"><span class="kv-key">File</span><span class="kv-val"><code>netlify/functions/license-webhook.js</code></span></div>
+          <div class="kv"><span class="kv-key">Trigger</span><span class="kv-val">Gumroad webhook POST on every completed sale</span></div>
+          <div class="kv"><span class="kv-key">Validation</span><span class="kv-val">Checks <code>GUMROAD_SELLER_ID</code> env var against POST body</span></div>
+          <div class="kv"><span class="kv-key">Key gen</span><span class="kv-val">JavaScript port of the C# HMAC-SHA256 algorithm</span></div>
+          <div class="kv"><span class="kv-key">Email API</span><span class="kv-val">Brevo (<code>api.brevo.com/v3/smtp/email</code>)</span></div>
+          <div class="kv"><span class="kv-key">Sender</span><span class="kv-val">maor@mm-ellah.com (verified in Brevo)</span></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Gumroad Product</div>
+          <div class="kv"><span class="kv-key">URL</span><span class="kv-val">maoriel.gumroad.com/l/mgnvzu</span></div>
+          <div class="kv"><span class="kv-key">Price</span><span class="kv-val">$49 USD fixed (pay-what-you-want OFF)</span></div>
+          <div class="kv"><span class="kv-key">Content</span><span class="kv-val">EllahColNumPro-Setup.exe (228 KB)</span></div>
+          <div class="kv"><span class="kv-key">Webhook</span><span class="kv-val">Netlify function endpoint (configured in Gumroad settings)</span></div>
+          <div class="kv"><span class="kv-key">Seller ID</span><span class="kv-val"><code>fq2wJB_z_zGscO6zbLwxlQ==</code></span></div>
+          <div class="kv"><span class="kv-key">Payout</span><span class="kv-val">PayPal → bank account (pending final setup)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <hr/>
+
+    <!-- 5. External Services -->
+    <div class="section">
+      <div class="section-title">Section 05</div>
+      <h2>External Services &amp; Accounts</h2>
+
+      <div class="callout callout-warn">
+        <strong>Security Notice:</strong> API keys must never be committed to the Git repository.
+        All secrets are stored exclusively as Netlify environment variables.
+        Keep this document in a secure location and do not share publicly.
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Service</th><th>Purpose</th><th>Account</th><th>Key / Secret location</th></tr></thead>
+          <tbody>
+            <tr><td>GitHub</td><td>Source code repository + CI/CD</td><td>github.com/M-M-ELLAH</td><td>Windows Credential Manager</td></tr>
+            <tr><td>Netlify</td><td>Static site hosting + serverless functions</td><td>app.netlify.com → ellah-colnum-pro</td><td>Netlify Dashboard → Environment variables</td></tr>
+            <tr><td>Gumroad</td><td>Payment processing + file delivery</td><td>maoriel.gumroad.com</td><td>Gumroad Settings → Advanced → API</td></tr>
+            <tr><td>Brevo</td><td>Transactional email (license key delivery)</td><td>app.brevo.com (maor@mm-ellah.com)</td><td>Netlify env var: <code>BREVO_API_KEY</code></td></tr>
+            <tr><td>PayPal</td><td>Receiving payments from Gumroad</td><td>PayPal personal account (maor@mm-ellah.com)</td><td>Gumroad payout settings</td></tr>
+            <tr><td>Google Fonts</td><td>Web fonts (Space Grotesk, Inter)</td><td>fonts.googleapis.com</td><td>No key required — public CDN</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Netlify Environment Variables (Required)</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Variable</th><th>Where to find the value</th><th>Used by</th></tr></thead>
+          <tbody>
+            <tr><td><code>BREVO_API_KEY</code></td><td>Brevo dashboard → SMTP &amp; API → API Keys tab</td><td><code>license-webhook.js</code> → sends license email</td></tr>
+            <tr><td><code>GUMROAD_SELLER_ID</code></td><td>Value: <code>fq2wJB_z_zGscO6zbLwxlQ==</code> (seen in Netlify function logs)</td><td><code>license-webhook.js</code> → validates webhook origin</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <hr/>
+
+    <!-- 6. File Map -->
+    <div class="section">
+      <div class="section-title">Section 06</div>
+      <h2>Repository &amp; File Map</h2>
+      <p style="font-size:11.5px; color:var(--muted); margin-bottom:12px;">
+        Local root: <code>C:\Users\maori\Desktop\NEW PROJECT - NUMBERS</code> &nbsp;·&nbsp;
+        Remote: <code>github.com/M-M-ELLAH/ellah-colnum-pro</code> (branch: main)
+      </p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Path</th><th>Type</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><code>docs/index.html</code></td><td>HTML/CSS/JS</td><td>Complete sales landing page — scroll-telling, pricing, FAQ, admin code widget</td></tr>
+            <tr><td><code>docs/assets/hero-v2.png</code></td><td>Image</td><td>Hero background — futuristic warrior with glowing eyes and builder hat</td></tr>
+            <tr><td><code>docs/assets/bg-problem.png</code></td><td>Image</td><td>Problem section background — dark city grid</td></tr>
+            <tr><td><code>docs/assets/bg-features.png</code></td><td>Image</td><td>Features section background — floating 3D elements</td></tr>
+            <tr><td><code>docs/assets/bg-pricing.png</code></td><td>Image</td><td>Pricing section background — tech-noir city</td></tr>
+            <tr><td><code>netlify/functions/license-webhook.js</code></td><td>Node.js</td><td>Serverless webhook: generate license key + send via Brevo API</td></tr>
+            <tr><td><code>netlify.toml</code></td><td>Config</td><td>Netlify: publish=docs, functions=netlify/functions, Node 18, security headers</td></tr>
+            <tr><td><code>src/Core/Licensing/LicenseKey.cs</code></td><td>C#</td><td>HMAC-SHA256 key generation + offline validation logic</td></tr>
+            <tr><td><code>src/Core/Licensing/LicenseValidator.cs</code></td><td>C#</td><td>Machine-ID binding, %APPDATA% file I/O, activation dialog</td></tr>
+            <tr><td><code>src/Core/ColumnNumberer.cs</code></td><td>C#</td><td>Main column numbering algorithm, Revit API, North-West sort</td></tr>
+            <tr><td><code>src/UI/MainDialog.xaml + .cs</code></td><td>WPF</td><td>Settings dialog with live preview DataGrid</td></tr>
+            <tr><td><code>src/ELLAH-ColNum.addin</code></td><td>XML</td><td>Revit add-in manifest — auto-loaded by Revit on startup</td></tr>
+            <tr><td><code>dist/EllahColNumPro-Setup.exe</code></td><td>Binary</td><td>Final installer — also uploaded to Gumroad product content</td></tr>
+            <tr><td><code>.gitignore</code></td><td>Config</td><td>Ignores bin/, obj/, dist/ — keeps docs/ tracked in Git</td></tr>
+            <tr><td><code>README.md</code></td><td>Docs</td><td>Project description, Revit version support, license info</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <hr/>
+
+    <!-- 7. Roadmap -->
+    <div class="section">
+      <div class="section-title">Section 07</div>
+      <h2>Future Roadmap &amp; Upgrade Options</h2>
+
+      <h3>Short Term — Easy wins</h3>
+      <div class="road-card">
+        <span class="badge badge-green">Easy</span>
+        <div class="road-body">
+          <div class="road-title">Trial Mode (7-day free trial)</div>
+          <div class="road-desc">Store first-run timestamp in Windows registry. Show "X days remaining" in the dialog. Add trial-key generator in Netlify. Zero infrastructure cost — fully offline check.</div>
+        </div>
+      </div>
+      <div class="road-card">
+        <span class="badge badge-green">Easy</span>
+        <div class="road-body">
+          <div class="road-title">Custom domain (ellah-colnum.com or ellah.tools)</div>
+          <div class="road-desc">Purchase via Namecheap or Cloudflare Registrar (~$10/yr). Point to Netlify via CNAME. Update Gumroad product URL and Brevo sender address. Professional branding upgrade.</div>
+        </div>
+      </div>
+
+      <h3>Medium Term</h3>
+      <div class="road-card">
+        <span class="badge badge-orange">Medium</span>
+        <div class="road-body">
+          <div class="road-title">Multi-machine license (N seats per key)</div>
+          <div class="road-desc">Add an activation counter in a cloud DB (Supabase free tier — 500 MB free). LicenseValidator calls a lightweight API on first activation. Supports 2-5 machines per key with per-seat pricing tiers.</div>
+        </div>
+      </div>
+      <div class="road-card">
+        <span class="badge badge-orange">Medium</span>
+        <div class="road-body">
+          <div class="road-title">Team / Office license portal</div>
+          <div class="road-desc">Dedicated checkout for offices (5+ seats at a volume discount). Admin dashboard to issue, transfer, or revoke individual keys. Built on Supabase + Netlify — no dedicated server needed.</div>
+        </div>
+      </div>
+      <div class="road-card">
+        <span class="badge badge-orange">Medium</span>
+        <div class="road-body">
+          <div class="road-title">Plugin v1.1 — Additional features</div>
+          <div class="road-desc">Grid-based numbering (A1, B2 …). Filter by selected elements only (not whole model). Export numbering schedule to Excel/CSV. South-East sort variant. Revit 2023 build (.NET Framework 4.8 target).</div>
+        </div>
+      </div>
+
+      <h3>Long Term</h3>
+      <div class="road-card">
+        <span class="badge badge-red">Complex</span>
+        <div class="road-body">
+          <div class="road-title">SaaS annual subscription model</div>
+          <div class="road-desc">Replace Gumroad one-time payment with Stripe subscription billing. License server validates key expiry on plugin startup (once per day, cached offline). Webhook handles renewal, cancellation, and refund events automatically.</div>
+        </div>
+      </div>
+      <div class="road-card">
+        <span class="badge badge-red">Complex</span>
+        <div class="road-body">
+          <div class="road-title">Revit App Store (Autodesk App Store)</div>
+          <div class="road-desc">Submit to store.autodesk.com for organic discovery. Autodesk handles payment processing and distribution. Requires code signing certificate and formal Autodesk review process (2–4 weeks).</div>
+        </div>
+      </div>
+    </div>
+
+    <hr/>
+
+    <!-- 8. Known Issues -->
+    <div class="section">
+      <div class="section-title">Section 08</div>
+      <h2>Known Issues &amp; Pending Items</h2>
+
+      <div class="callout callout-info">
+        <strong>Admin coupon URL:</strong> Gumroad's new checkout flow does not reliably apply
+        coupons passed via <code>?coupon=</code> URL parameter. Current implementation uses the
+        path-based format (<code>/l/mgnvzu/ELLAH-OFFICE</code>). If this also fails,
+        the fallback is to display the coupon code directly and instruct the user to enter it
+        manually in Gumroad's "Have a discount code?" field at checkout.
+      </div>
+      <div class="callout callout-info">
+        <strong>Gumroad payout:</strong> Bank account or PayPal payout method not yet finalized.
+        Must be completed before the first real sale can be withdrawn. Israeli bank account
+        details (IBAN / SWIFT) or PayPal linkage required in Gumroad Settings → Payouts.
+      </div>
+      <div class="callout callout-info">
+        <strong>Euska Patur (עוסק פטור):</strong> User plans to register as a sole trader before
+        exceeding the annual turnover threshold (~110,000 NIS). Sales volume should be monitored.
+        All invoicing should be issued correctly once registered.
+      </div>
+    </div>
+
+  </div><!-- /body -->
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <span>ELLAH-ColNum Pro · Project Progress Report · April 2026</span>
+    <span>maor@mm-ellah.com &nbsp;·&nbsp; <a href="https://m-m-ellah.github.io/ellah-colnum-pro/">ellah-colnum-pro</a></span>
+  </div>
+
+</div><!-- /page -->
+
+<!-- Print button (hidden on print) -->
+<div class="no-print" style="text-align:center; padding:28px; background:var(--bg);">
+  <button onclick="window.print()"
+    style="font-family:Inter,sans-serif; font-size:14px; font-weight:600;
+           background:#1a56db; color:#fff; border:none; border-radius:8px;
+           padding:12px 32px; cursor:pointer; letter-spacing:0.03em;">
+    Save as PDF (Ctrl+P)
+  </button>
+</div>
+
+</body>
+</html>

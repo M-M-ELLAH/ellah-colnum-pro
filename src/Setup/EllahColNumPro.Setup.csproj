@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>EllahColNumPro-Setup</AssemblyName>
+    <RootNamespace>EllahColNum.Setup</RootNamespace>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <!-- Framework-dependent: relies on .NET 8 which Revit 2025 installs automatically -->
+    <SelfContained>false</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <PublishSingleFile>true</PublishSingleFile>
+  </PropertyGroup>
+
+  <!-- Embed the plugin files directly inside the exe -->
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\EllahColNumPro.dll"      LogicalName="EllahColNumPro.dll"      Condition="Exists('Resources\EllahColNumPro.dll')" />
+    <EmbeddedResource Include="Resources\EllahColNumPro.Core.dll" LogicalName="EllahColNumPro.Core.dll" Condition="Exists('Resources\EllahColNumPro.Core.dll')" />
+    <EmbeddedResource Include="Resources\EllahColNumPro.addin"    LogicalName="EllahColNumPro.addin"    Condition="Exists('Resources\EllahColNumPro.addin')" />
+  </ItemGroup>
+
+</Project>

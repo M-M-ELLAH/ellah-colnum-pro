@@ -1,5 +1,6 @@
 # Build output
 dist/
+!dist/*-Setup.exe
 src/*/bin/
 src/*/obj/
 

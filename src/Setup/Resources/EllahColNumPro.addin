@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+
+  <!-- Application: creates the ribbon tab on Revit startup -->
+  <AddIn Type="Application">
+    <Name>ELLAH-ColNum Pro</Name>
+    <Assembly>EllahColNumPro.dll</Assembly>
+    <FullClassName>EllahColNum.Revit.App.EllahColNumProApp</FullClassName>
+    <ClientId>e11a4c01-f00d-4200-b00b-000000000002</ClientId>
+    <VendorId>EllahColNumPro</VendorId>
+    <VendorDescription>ELLAH-ColNum Pro — Smart Column Numbering for Revit</VendorDescription>
+  </AddIn>
+
+  <!-- Command: column numbering -->
+  <AddIn Type="Command">
+    <Name>Number Structural Columns</Name>
+    <Description>Numbers all structural columns across all floors — sequential or grid-based.</Description>
+    <Assembly>EllahColNumPro.dll</Assembly>
+    <FullClassName>EllahColNum.Revit.Commands.NumberColumnsCommand</FullClassName>
+    <ClientId>e11a4c01-f00d-4200-b00b-000000000001</ClientId>
+    <VendorId>EllahColNumPro</VendorId>
+    <VendorDescription>ELLAH-ColNum Pro</VendorDescription>
+  </AddIn>
+
+  <!-- Command: smart grid dimensions (Phase 1) -->
+  <AddIn Type="Command">
+    <Name>Smart Grid Dimensions</Name>
+    <Description>Automatically creates dimension strings between all grid lines in selected plan views.</Description>
+    <Assembly>EllahColNumPro.dll</Assembly>
+    <FullClassName>EllahColNum.Revit.Dimensions.Commands.DimensionGridsCommand</FullClassName>
+    <ClientId>e11a4c01-f00d-4200-b00b-000000000003</ClientId>
+    <VendorId>EllahColNumPro</VendorId>
+    <VendorDescription>ELLAH-ColNum Pro</VendorDescription>
+  </AddIn>
+
+  <!-- Command: pro dimensions (Phase 2) — columns, walls, openings, grids -->
+  <AddIn Type="Command">
+    <Name>Pro Dimensions</Name>
+    <Description>Creates multi-layer professional dimension strings from columns, walls, openings and grids.</Description>
+    <Assembly>EllahColNumPro.dll</Assembly>
+    <FullClassName>EllahColNum.Revit.Dimensions.Commands.ProDimensionsCommand</FullClassName>
+    <ClientId>e11a4c01-f00d-4200-b00b-000000000004</ClientId>
+    <VendorId>EllahColNumPro</VendorId>
+    <VendorDescription>ELLAH-ColNum Pro</VendorDescription>
+  </AddIn>
+
+</RevitAddIns>

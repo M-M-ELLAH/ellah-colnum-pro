@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>EllahColNumPro.Core</AssemblyName>
+    <RootNamespace>EllahColNum.Core</RootNamespace>
+    <!-- Core has ZERO dependency on Revit — pure C# domain logic only -->
+  </PropertyGroup>
+
+</Project>
